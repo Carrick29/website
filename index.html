@@ -3,18 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PKPD Database</title>
+    <title>Memory Bloom - Game Scores</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>🎮 Memory Bloom</h1>
+            <p class="subtitle">實時遊戲分數監控系統</p>
+        </header>
 
-    <h1>我的 Firebase 網頁</h1>
-    <div id="status">正在連接資料庫...</div>
-    <button id="sendBtn">點我寫入資料</button>
+        <div class="dashboard">
+            <div class="card">
+                <h2><i>📊</i> 遊戲統計</h2>
+                <div class="stat-number" id="totalGames">0</div>
+                <div class="stat-label">總遊戲次數</div>
+                <div class="stat-number" id="averageScore">0</div>
+                <div class="stat-label">平均分數</div>
+                <div class="stat-number" id="highScore">0</div>
+                <div class="stat-label">最高分數</div>
+            </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    
+            <div class="card">
+                <h2><i>📈</i> 分數趨勢</h2>
+                <div class="chart-container">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i>🎯</i> 最新成績</h2>
+                <div class="stat-number" id="latestScore">0</div>
+                <div class="stat-label">最新分數</div>
+                <div id="latestTime">--:--:--</div>
+                <div class="stat-label">更新時間</div>
+                <div id="connectionStatus" class="status-offline">離線</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i>📱</i> 設備列表</h2>
+            <div class="device-list" id="deviceList">
+                <div class="loading">載入設備中...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i>📋</i> 遊戲記錄</h2>
+            <div id="recordsTable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>分數</th>
+                            <th>序列長度</th>
+                            <th>遊戲時長</th>
+                            <th>設備</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <tr>
+                            <td colspan="5" class="loading">載入記錄中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Memory Bloom - 記憶力訓練遊戲 | 數據實時同步至 Firebase</p>
+        <p>最後更新: <span id="lastUpdate">--:--:--</span></p>
+    </footer>
+
     <script src="script.js"></script>
 </body>
 </html>
