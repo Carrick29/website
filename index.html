@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Bloom - Game Scores</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            font-size: 1.2em;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .status-online {
+            color: #4CAF50;
+        }
+
+        .status-offline {
+            color: #FF5252;
+        }
+
+        .device-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .device-chip {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .device-chip:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .device-chip.active {
+            background: #4CAF50;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Memory Bloom</h1>
+            <p class="subtitle">實時遊戲分數監控系統</p>
+        </header>
+
+        <div class="dashboard">
+            <!-- 實時統計 -->
+            <div class="card">
+                <h2><i>📊</i> 遊戲統計</h2>
+                <div class="stat-number" id="totalGames">0</div>
+                <div class="stat-label">總遊戲次數</div>
+                <div class="stat-number" id="averageScore">0</div>
+                <div class="stat-label">平均分數</div>
+                <div class="stat-number" id="highScore">0</div>
+                <div class="stat-label">最高分數</div>
+            </div>
+
+            <!-- 實時圖表 -->
+            <div class="card">
+                <h2><i>📈</i> 分數趨勢</h2>
+                <div class="chart-container">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 最新分數 -->
+            <div class="card">
+                <h2><i>🎯</i> 最新成績</h2>
+                <div class="stat-number" id="latestScore">0</div>
+                <div class="stat-label">最新分數</div>
+                <div id="latestTime">--:--:--</div>
+                <div class="stat-label">更新時間</div>
+                <div id="connectionStatus" class="status-offline">離線</div>
+            </div>
+        </div>
+
+        <!-- 設備選擇 -->
+        <div class="card">
+            <h2><i>📱</i> 設備列表</h2>
+            <div class="device-list" id="deviceList">
+                <div class="loading">載入設備中...</div>
+            </div>
+        </div>
+
+        <!-- 詳細記錄 -->
+        <div class="card">
+            <h2><i>📋</i> 遊戲記錄</h2>
+            <div id="recordsTable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>分數</th>
+                            <th>序列長度</th>
+                            <th>遊戲時長</th>
+                            <th>設備</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <tr>
+                            <td colspan="5" class="loading">載入記錄中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Memory Bloom - 記憶力訓練遊戲 | 數據實時同步至Firebase</p>
+        <p>最後更新: <span id="lastUpdate">--:--:--</span></p>
+    </footer>
+
+    <script>
+        // Firebase配置
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "your-project.firebaseapp.com",
+            databaseURL: "https://your-project.firebaseio.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // 初始化Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // 全局變量
+        let currentDevice = null;
+        let scoreChart = null;
+        let scores = [];
+        let devices = [];
+
+        // 初始化圖表
+        function initChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            scoreChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '分數趨勢',
+                        data: [],
+                        borderColor: '#FFD700',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#fff' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 加載設備列表
+        async function loadDevices() {
+            try {
+                const snapshot = await database.ref('devices').once('value');
+                const devicesData = snapshot.val();
+                
+                if (!devicesData) {
+                    document.getElementById('deviceList').innerHTML = '<div class="loading">暫無設備數據</div>';
+                    return;
+                }
+                
+                devices = Object.keys(devicesData);
+                const deviceList = document.getElementById('deviceList');
+                deviceList.innerHTML = '';
+                
+                devices.forEach(deviceId => {
+                    const chip = document.createElement('div');
+                    chip.className = 'device-chip';
+                    chip.innerHTML = `<i>📱</i> ${deviceId.substring(0, 8)}...`;
+                    chip.onclick = () => selectDevice(deviceId);
+                    deviceList.appendChild(chip);
+                });
+                
+                // 默認選擇第一個設備
+                if (devices.length > 0) {
+                    selectDevice(devices[0]);
+                }
+                
+            } catch (error) {
+                console.error('加載設備失敗:', error);
+            }
+        }
+
+        // 選擇設備
+        function selectDevice(deviceId) {
+            currentDevice = deviceId;
+            
+            // 更新UI
+            document.querySelectorAll('.device-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.textContent.includes(deviceId.substring(0, 8))) {
+                    chip.classList.add('active');
+                }
+            });
+            
+            // 加載設備數據
+            loadDeviceData(deviceId);
+            
+            // 監聽實時更新
+            listenForRealtimeUpdates(deviceId);
+        }
+
+        // 加載設備數據
+        async function loadDeviceData(deviceId) {
+            try {
+                // 加載統計數據
+                const statsSnapshot = await database.ref(`devices/${deviceId}/statistics`).once('value');
+                const stats = statsSnapshot.val();
+                
+                if (stats) {
+                    document.getElementById('totalGames').textContent = stats.totalGames || 0;
+                    document.getElementById('averageScore').textContent = stats.averageScore ? stats.averageScore.toFixed(1) : 0;
+                    document.getElementById('highScore').textContent = stats.highScore || 0;
+                }
+                
+                // 加載歷史記錄
+                const scoresSnapshot = await database.ref(`devices/${deviceId}/scores`).once('value');
+                const scoresData = scoresSnapshot.val();
+                
+                if (scoresData) {
+                    scores = Object.values(scoresData).sort((a, b) => b.timestamp - a.timestamp);
+                    updateRecordsTable();
+                    updateChart();
+                    
+                    // 顯示最新分數
+                    if (scores.length > 0) {
+                        const latest = scores[0];
+                        document.getElementById('latestScore').textContent = latest.score;
+                        document.getElementById('latestTime').textContent = new Date(latest.timestamp * 1000).toLocaleTimeString();
+                    }
+                }
+                
+                // 更新狀態
+                document.getElementById('connectionStatus').textContent = '在線';
+                document.getElementById('connectionStatus').className = 'status-online';
+                
+            } catch (error) {
+                console.error('加載數據失敗:', error);
+            }
+        }
+
+        // 監聽實時更新
+        function listenForRealtimeUpdates(deviceId) {
+            // 監聽新分數
+            database.ref(`devices/${deviceId}/scores`).on('child_added', (snapshot) => {
+                const newScore = snapshot.val();
+                newScore.id = snapshot.key;
+                
+                scores.unshift(newScore);
+                if (scores.length > 20) scores.pop();
+                
+                updateRecordsTable();
+                updateChart();
+                updateLatestScore(newScore);
+                
+                // 播放通知音效
+                playNotificationSound();
+                
+                // 顯示通知
+                showNotification(`新分數: ${newScore.score}`);
+            });
+            
+            // 監聽統計更新
+            database.ref(`devices/${deviceId}/statistics`).on('value', (snapshot) => {
+                const stats = snapshot.val();
+                if (stats) {
+                    document.getElementById('totalGames').textContent = stats.totalGames || 0;
+                    document.getElementById('averageScore').textContent = stats.averageScore ? stats.averageScore.toFixed(1) : 0;
+                    document.getElementById('highScore').textContent = stats.highScore || 0;
+                }
+            });
+        }
+
+        // 更新記錄表格
+        function updateRecordsTable() {
+            const tbody = document.getElementById('recordsBody');
+            tbody.innerHTML = '';
+            
+            scores.slice(0, 10).forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(record.timestamp * 1000).toLocaleString()}</td>
+                    <td><span class="score-badge">${record.score}</span></td>
+                    <td>${record.sequenceLength || 'N/A'}</td>
+                    <td>${record.duration ? record.duration + 's' : 'N/A'}</td>
+                    <td>${record.deviceID ? record.deviceID.substring(0, 8) + '...' : 'Unknown'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+
+        // 更新圖表
+        function updateChart() {
+            const chartScores = scores.slice(0, 10).reverse();
+            
+            scoreChart.data.labels = chartScores.map((_, index) => `第${index + 1}次`);
+            scoreChart.data.datasets[0].data = chartScores.map(score => score.score);
+            scoreChart.update();
+        }
+
+        // 更新最新分數
+        function updateLatestScore(score) {
+            document.getElementById('latestScore').textContent = score.score;
+            document.getElementById('latestScore').classList.add('pulse');
+            
+            document.getElementById('latestTime').textContent = new Date().toLocaleTimeString();
+            
+            setTimeout(() => {
+                document.getElementById('latestScore').classList.remove('pulse');
+            }, 1000);
+        }
+
+        // 播放通知音效
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.3);
+                
+            } catch (e) {
+                console.log('音效播放失敗:', e);
+            }
+        }
+
+        // 顯示通知
+        function showNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Memory Bloom', {
+                    body: message,
+                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMyIDZDMjIuMDYgNiAxNCAxNC4wNiAxNCAyNFY0MEgxNkMyMC40MiA0MCAyNCA0My41OCAyNCA0OFY1OEgyOFY1MEMyOCA0Ny43OSAyNi4yMSA0NiAyNCA0NkgxNlYyNEMxNiAxNi4yNyAyMi4yNyAxMCAzMCAxMEgzMkMzNy41MiAxMCA0MiAxNC40OCA0MiAyMFYyOUg0NFYyMEM0NCAxNi4xNCA0MC44NiAxMi44NiAzNi44NCAxMi4xNUMzNS4yNiAxMi4wNSAzMy42NiAxMiAzMiAxMlpNMTIgMzJIMjhWNDBIMTJWMzJaTTQgNDRIMjBWNTRINFY0NFpNNDAgMTZINTZWMjZINDBWM
