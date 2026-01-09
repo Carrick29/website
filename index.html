@@ -4,22 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Bloom - 數據監控中心</title>
-    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <link rel="stylesheet" href="style.css?v=1.2">
+    <link rel="stylesheet" href="style.css?v=1.3">
 </head>
 <body>
     <div class="container">
         <div class="top-row">
             <div class="card title-card">
                 <h1>🎮 Memory Bloom</h1>
-                <p class="subtitle">實時監控中心</p>
-                <div class="system-status">
-                    <span class="dot"></span> 系統同步中
-                </div>
+                <p class="subtitle">遊戲數據實時監控與分析系統</p>
+                <p class="version-info">系統版本 v2.4.0 | 雲端同步技術支援</p>
             </div>
 
             <div class="card note-card">
@@ -32,10 +28,10 @@
             </div>
         </div>
 
-        <div class="card device-selection-card">
-            <h2>📱 選擇設備</h2>
+        <div class="card">
+            <h2>📱 選擇監控設備</h2>
             <div class="device-list" id="deviceList">
-                <div class="loading">正在搜尋設備...</div>
+                <div class="loading">正在搜尋 Firebase 中的設備...</div>
             </div>
         </div>
 
@@ -95,9 +91,9 @@
     </div>
 
     <footer>
-        <p>Memory Bloom | Firebase 實時同步 | 更新於: <span id="lastUpdate">--:--:--</span></p>
+        <p>Memory Bloom | Firebase 實時同步 | 最後更新: <span id="lastUpdate">--:--:--</span></p>
     </footer>
 
-    <script src="script.js?v=1.2"></script>
+    <script src="script.js?v=1.3"></script>
 </body>
 </html>
