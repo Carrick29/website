@@ -1,4 +1,4 @@
-/* --- 基礎設定 --- */
+/* --- 基礎初始化 --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -10,119 +10,84 @@ body {
     flex-direction: column;
 }
 
-/* --- 全螢幕容器 --- */
 .container {
     width: 100%;
-    max-width: 100%; /* 填滿全螢幕 */
+    max-width: 100%;
     padding: 20px;
     flex: 1;
 }
 
-/* --- 第一行：Header 左右分欄 --- */
-.main-header {
-    display: flex;
-    justify-content: space-between; /* 左右撐開 */
-    align-items: center;
-    background: #fff;
-    padding: 20px 30px;
-    border: 2px solid #0277bd;
+/* --- 第一行：雙獨立方格佈局 --- */
+.top-row {
+    display: grid;
+    grid-template-columns: 350px 1fr; /* 左邊固定寬度，右邊填滿 */
+    gap: 20px;
     margin-bottom: 20px;
 }
 
-.header-left h1 { color: #01579b; font-size: 1.8em; }
-.header-left .subtitle { color: #546e7a; }
-
-.header-right {
-    text-align: right;
-    max-width: 400px;
-    width: 100%;
-}
-
-.comment-box {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 5px;
-}
-
-.comment-box input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    outline: none;
-}
-
-.comment-box button {
-    padding: 8px 15px;
-    background: #0277bd;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.comment-box button:hover { background: #01579b; }
-
-.status-msg { font-size: 0.85em; color: #666; }
-#currentMsg { color: #d32f2f; font-weight: bold; }
-
-/* --- 卡片與佈局 --- */
 .card {
     background: #fff;
     padding: 20px;
     border: 2px solid #0277bd;
-    margin-bottom: 20px;
+    border-radius: 0;
 }
 
-.card h2 {
-    font-size: 1.1em;
-    color: #0277bd;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #e1f5fe;
-    padding-bottom: 5px;
-}
+/* 標題格 */
+.title-card h1 { color: #01579b; font-size: 1.6em; }
+.system-status { font-size: 0.85em; color: #2e7d32; margin-top: 10px; display: flex; align-items: center; gap: 5px; }
+.dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; display: inline-block; }
 
+/* 備註格 (留言區) */
+.note-card { display: flex; flex-direction: column; }
+.note-card h2 { font-size: 1.1em; color: #0277bd; margin-bottom: 10px; border-bottom: 1px solid #e1f5fe; padding-bottom: 5px; }
+.note-card textarea {
+    flex: 1;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    background: #fcfcfc;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+}
+.note-card textarea:focus { border-color: #0277bd; background: #fff; }
+
+.note-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+#currentMsg { font-size: 0.8em; color: #777; font-style: italic; }
+#sendMsgBtn { background: #0277bd; color: #fff; border: none; padding: 6px 15px; cursor: pointer; font-weight: bold; }
+#sendMsgBtn:hover { background: #01579b; }
+
+/* --- 儀表板區域 --- */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-/* --- 統計數字 --- */
 .stat-group { display: flex; gap: 30px; }
 .stat-number { font-size: 2.8em; font-weight: 800; color: #0277bd; }
-.stat-label { font-size: 0.85em; color: #777; }
+.stat-label { font-size: 0.8em; color: #666; }
 
-/* --- 設備列表 --- */
-.device-list { display: flex; gap: 10px; flex-wrap: wrap; }
-.device-chip {
-    padding: 8px 15px;
-    border: 2px solid #e0e0e0;
-    cursor: pointer;
-    font-weight: 600;
-}
+/* --- 設備清單 --- */
+.device-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.device-chip { padding: 8px 15px; border: 2px solid #e0e0e0; cursor: pointer; font-weight: 600; }
 .device-chip.active { background: #0277bd; color: #fff; border-color: #0277bd; }
 
 /* --- 圖表與表格 --- */
 .chart-container { height: 250px; position: relative; }
-.table-responsive { width: 100%; overflow-x: auto; }
+.table-responsive { width: 100%; overflow-x: auto; margin-top: 10px; }
 table { width: 100%; border-collapse: collapse; min-width: 600px; }
 th, td { padding: 12px; border: 1px solid #0277bd; text-align: left; }
 th { background: #e1f5fe; color: #01579b; }
 
-.status-online { color: #2e7d32; background: #e8f5e9; padding: 2px 8px; border-radius: 4px; }
-.status-offline { color: #d32f2f; background: #ffebee; padding: 2px 8px; border-radius: 4px; }
+.status-online { color: #2e7d32; font-weight: bold; }
+.status-offline { color: #d32f2f; font-weight: bold; }
 
-footer {
-    text-align: center;
-    padding: 20px;
-    background: #fff;
-    border-top: 2px solid #0277bd;
-    color: #90a4ae;
-    margin-top: auto;
-}
+footer { text-align: center; padding: 20px; background: #fff; border-top: 2px solid #0277bd; color: #90a4ae; margin-top: auto; }
 
-/* 手機版適應 */
-@media (max-width: 768px) {
-    .main-header { flex-direction: column; text-align: center; }
-    .header-right { text-align: center; margin-top: 15px; }
+/* 手機適應 */
+@media (max-width: 900px) {
+    .top-row { grid-template-columns: 1fr; }
 }
