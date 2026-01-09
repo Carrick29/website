@@ -101,9 +101,9 @@ function selectDevice(deviceId) {
 
     const statusEl = document.getElementById('connectionStatus');
     statusEl.textContent = '正在同步數據...';
-    statusEl.className = 'status-online';
+    statusEl.className = 'status-online'; // 這裡只是表示正在嘗試讀取數據庫
 
-    // --- A. 監聽統計數據 (修正路徑: /statistics/{mac}) ---
+    // --- A. 監聽統計數據 ---
     database.ref(`statistics/${deviceId}`).on('value', (snapshot) => {
         const stats = snapshot.val();
         if (stats) {
@@ -111,12 +111,11 @@ function selectDevice(deviceId) {
             document.getElementById('highScore').textContent = stats.highScore || 0;
             document.getElementById('totalScore').textContent = stats.totalScore || 0;
         } else {
-            // 如果沒有統計數據
             document.getElementById('totalGames').textContent = '-';
         }
     });
 
-    // --- B. 監聽遊戲記錄 (修正路徑: /devices/{mac}/sessions) ---
+    // --- B. 監聽遊戲記錄 ---
     database.ref(`devices/${deviceId}/sessions`).orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
         const data = snapshot.val();
         if (!data) {
@@ -126,27 +125,52 @@ function selectDevice(deviceId) {
 
         // 轉換並排序 (最新的在前面)
         scores = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
+        
+        // 核心修改：在收到數據後更新界面和狀態
         updateDashboard();
-        statusEl.textContent = '實時連線中';
     });
 }
 
-// 6. 更新界面
+// 6. 更新界面 (包含智能狀態判斷)
 function updateDashboard() {
     const tbody = document.getElementById('recordsBody');
     tbody.innerHTML = '';
+    const statusEl = document.getElementById('connectionStatus');
+
+    // --- 智能狀態判斷邏輯 ---
+    if (scores.length > 0) {
+        const latest = scores[0];
+        const lastActiveTime = new Date(latest.timestamp * 1000);
+        const now = new Date();
+        const diffMinutes = (now - lastActiveTime) / 1000 / 60; // 差距分鐘數
+
+        // 如果最後一條數據是在 5 分鐘內上傳的，視為在線
+        if (diffMinutes < 5) {
+            statusEl.textContent = '🟢 設備活躍中';
+            statusEl.className = 'status-online';
+        } else {
+            // 計算顯示時間 (例如：2小時前)
+            let timeAgo = '';
+            if (diffMinutes < 60) timeAgo = `${Math.floor(diffMinutes)}分鐘前`;
+            else if (diffMinutes < 1440) timeAgo = `${Math.floor(diffMinutes/60)}小時前`;
+            else timeAgo = `${Math.floor(diffMinutes/1440)}天前`;
+
+            statusEl.textContent = `🔴 設備離線 (上次活躍: ${timeAgo})`;
+            statusEl.className = 'status-offline';
+        }
+    } else {
+        statusEl.textContent = '⚪ 無數據';
+        statusEl.className = 'status-offline';
+    }
+    // ----------------------
 
     // A. 更新表格
     scores.forEach(record => {
         const row = tbody.insertRow();
-        // 處理時間戳 (ESP32傳的是秒，JS需要毫秒)
         const date = record.timestamp ? new Date(record.timestamp * 1000) : new Date();
         const dateStr = date.toLocaleString('zh-TW');
         
-        // 判斷模式
         let modeLabel = record.mode === 'memory' ? '記憶 (Memory)' : (record.mode === 'counting' ? '計數 (Count)' : record.mode);
-        
-        // Session ID (顯示部分)
         let sid = record.sessionID || 'N/A';
 
         row.innerHTML = `
@@ -168,10 +192,10 @@ function updateDashboard() {
 
     // C. 更新圖表 (取最近 10 筆)
     if (scoreChart) {
-        const chartData = scores.slice(0, 10).reverse(); // 反轉，讓舊的在左邊
+        const chartData = scores.slice(0, 10).reverse(); 
         scoreChart.data.labels = chartData.map(d => {
             const date = new Date(d.timestamp * 1000);
-            return `${date.getHours()}:${date.getMinutes()}`;
+            return `${date.getHours()}:${date.getMinutes()}`; // 只顯示時:分
         });
         scoreChart.data.datasets[0].data = chartData.map(d => d.score);
         scoreChart.update();
@@ -184,4 +208,9 @@ function updateDashboard() {
 document.addEventListener('DOMContentLoaded', () => {
     initChart();
     loadDevices();
+    
+    // 每分鐘自動刷新一次狀態顯示 (更新"幾分鐘前")
+    setInterval(() => {
+        if(scores.length > 0) updateDashboard();
+    }, 60000);
 });
