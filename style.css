@@ -1,17 +1,16 @@
 /* 全局設定 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f7f9; /* 淺灰藍背景 */
+    background-color: #f4f7f9;
     color: #333;
     padding: 20px;
     line-height: 1.6;
 }
+
+/* 容器 */
+.container { max-width: 1200px; margin: 0 auto; }
 
 /* 標題區域 */
 header {
@@ -19,138 +18,80 @@ header {
     margin-bottom: 30px;
     padding: 30px;
     background: #fff;
-    border: 2px solid #0277bd; /* 藍色外框 */
-    border-radius: 0; /* 確保直角 */
+    border: 2px solid #0277bd;
+    border-radius: 0;
 }
-
-h1 {
-    color: #01579b;
-    font-size: 2.2em;
-    margin-bottom: 5px;
-    font-weight: 700;
-}
+h1 { color: #01579b; font-size: 2.2em; margin-bottom: 5px; font-weight: 700; }
+.subtitle { color: #546e7a; font-size: 1.1em; }
 
 /* 儀表板佈局 */
 .dashboard {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
     margin-bottom: 30px;
 }
 
-/* 所有格子的核心樣式：藍色外框 + 直角 */
+/* 卡片樣式 */
 .card {
     background: #fff;
     padding: 25px;
-    border: 2px solid #0277bd; /* 統一藍色邊框 */
-    border-radius: 0; /* 強制直角 */
-    box-shadow: none; /* 移除陰影，強化格子感 */
+    border: 2px solid #0277bd;
+    border-radius: 0;
 }
-
 .card h2 {
     font-size: 1.2em;
     color: #0277bd;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #e1f5fe; /* 標題下方的淺藍細線 */
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    border-bottom: 1px solid #e1f5fe;
+    display: flex; align-items: center; gap: 10px;
 }
 
 /* 統計數字 */
-.stat-number {
-    font-size: 3.5em;
-    font-weight: 800;
-    color: #0277bd;
-    margin: 10px 0;
-}
+.stat-number { font-size: 3.5em; font-weight: 800; color: #0277bd; margin: 5px 0; }
+.stat-label { font-size: 0.85em; color: #546e7a; font-weight: 600; margin-bottom: 15px; }
 
-.stat-label {
-    font-size: 0.85em;
-    color: #546e7a;
-    letter-spacing: 1px;
-    font-weight: 600;
-}
+/* 狀態指示燈 */
+.status-online { color: #2e7d32; font-weight: bold; background: #e8f5e9; padding: 2px 8px; border-radius: 4px; }
+.status-offline { color: #d32f2f; font-weight: bold; background: #ffebee; padding: 2px 8px; border-radius: 4px; }
 
-/* 表格樣式：格格分明 */
-table {
-    width: 100%;
-    border-collapse: collapse; /* 讓邊框合併，格線更清晰 */
-    margin-top: 15px;
-}
-
-th, td {
-    padding: 12px 15px;
-    text-align: left;
-    border: 1px solid #0277bd; /* 表格格線設為藍色 */
-    color: #455a64;
-}
-
-th {
-    background-color: #e1f5fe; /* 表頭淺藍背景 */
-    color: #01579b;
-    font-weight: 700;
-}
-
-/* 分數標籤 */
-.score-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    background: #fff;
-    color: #0277bd;
-    border: 1px solid #0277bd; /* 標籤藍色邊框 */
-    border-radius: 0; /* 直角 */
-    font-weight: bold;
-    font-family: 'Courier New', Courier, monospace;
-}
-
-/* 設備列表選擇器 */
-.device-list {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 15px;
-}
-
+/* 設備列表 */
+.device-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
 .device-chip {
-    padding: 12px 20px;
+    padding: 10px 15px;
     background: #fff;
-    border: 1px solid #0277bd; /* 預設藍色邊框 */
-    color: #0277bd;
+    border: 2px solid #e0e0e0;
+    color: #546e7a;
     cursor: pointer;
     font-weight: 600;
-    border-radius: 0; /* 直角 */
     transition: all 0.2s;
 }
+.device-chip:hover { border-color: #0277bd; color: #0277bd; }
+.device-chip.active { background: #0277bd; color: #fff; border-color: #0277bd; }
 
-.device-chip:hover {
-    background: #e1f5fe;
+/* 表格樣式 */
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; color: #455a64; }
+th { background-color: #e1f5fe; color: #01579b; font-weight: 700; border: 1px solid #0277bd; }
+td { border: 1px solid #0277bd; }
+
+.score-badge {
+    display: inline-block; padding: 4px 10px;
+    background: #0277bd; color: #fff;
+    border-radius: 12px; font-weight: bold; font-size: 0.9em;
 }
-
-.device-chip.active {
-    background: #0277bd; /* 選中時填滿藍色 */
-    color: #fff;
-    border-color: #01579b;
-}
-
-/* 連線狀態 */
-.status-online { color: #2e7d32; font-weight: bold; }
-.status-offline { color: #d32f2f; font-weight: bold; }
-
-/* 頁尾 */
-footer {
-    text-align: center;
-    padding: 30px;
-    color: #90a4ae;
-    border-top: 2px solid #0277bd; /* 頁尾上方也要藍線 */
-    margin-top: 50px;
-    font-size: 0.9em;
+.mode-badge {
+    font-size: 0.8em; padding: 2px 6px; border: 1px solid #ccc;
+    color: #666; border-radius: 4px; text-transform: uppercase;
 }
 
 /* 圖表容器 */
-.chart-container {
-    height: 300px;
-    border: 1px solid #e1f5fe; /* 圖表周圍稍微淡一點的邊框 */
-    padding: 10px;
+.chart-container { position: relative; height: 250px; width: 100%; }
+
+/* 頁尾 */
+footer {
+    text-align: center; padding: 30px; color: #90a4ae;
+    border-top: 2px solid #0277bd; margin-top: 50px; font-size: 0.9em;
 }
+.loading { color: #999; font-style: italic; padding: 20px; text-align: center; }
