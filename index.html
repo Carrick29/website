@@ -3,89 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Bloom - 數據 監控</title>
+    <title>Memory Bloom - 數據監控中心</title>
     
-    <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- 引入 Chart.js 圖表庫 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- 引入自定義樣式 -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.1">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🎮 Memory Bloom</h1>
-            <p class="subtitle">遊戲數據實時監控</p>
+        <header class="main-header">
+            <div class="header-left">
+                <h1>🎮 Memory Bloom</h1>
+                <p class="subtitle">實時監控面板</p>
+            </div>
+            <div class="header-right">
+                <div class="comment-box">
+                    <input type="text" id="sysMsgInput" placeholder="輸入公告或設備備註...">
+                    <button id="sendMsgBtn">發佈</button>
+                </div>
+                <p class="status-msg">最新公告：<span id="currentMsg">系統正常運行中</span></p>
+            </div>
         </header>
 
-        <!-- 設備選擇區 -->
-        <div class="card" style="margin-bottom: 30px;">
-            <h2>📱 選擇設備 (點擊查看詳情)</h2>
+        <div class="card device-card">
+            <h2>📱 選擇掃描設備</h2>
             <div class="device-list" id="deviceList">
                 <div class="loading">正在搜尋 Firebase 中的設備...</div>
             </div>
         </div>
 
         <div class="dashboard">
-            <!-- 統計卡片 -->
             <div class="card">
                 <h2>📊 累計數據</h2>
-                <div class="stat-number" id="totalGames">0</div>
-                <div class="stat-label">總遊玩次數</div>
-                
-                <div class="stat-number" id="highScore" style="font-size: 2.5em;">0</div>
-                <div class="stat-label">歷史最高分</div>
-
-                <div class="stat-number" id="totalScore" style="font-size: 2.5em;">0</div>
-                <div class="stat-label">總累積分數</div>
+                <div class="stat-group">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalGames">0</div>
+                        <div class="stat-label">總遊玩次數</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="highScore">0</div>
+                        <div class="stat-label">歷史最高分</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- 圖表卡片 -->
-            <div class="card">
-                <h2>📈 近期表現 (最近10場)</h2>
+            <div class="card chart-card">
+                <h2>📈 近期表現</h2>
                 <div class="chart-container">
                     <canvas id="scoreChart"></canvas>
                 </div>
             </div>
 
-            <!-- 最新狀態卡片 -->
             <div class="card">
                 <h2>🎯 最新一局</h2>
                 <div class="stat-number" id="latestScore">0</div>
                 <div class="stat-label">分數</div>
-                
-                <div style="font-size: 1.2em; color: #333; margin-top: 10px;" id="latestMode">--</div>
-                <div class="stat-label">模式</div>
-
-                <div style="margin-top: 20px;" id="latestTime">--:--:--</div>
-                <div class="stat-label">時間</div>
-                
-                <div style="margin-top: 10px;">狀態: <span id="connectionStatus" class="status-offline">等待數據...</span></div>
+                <div id="latestMode" style="font-weight: bold;">--</div>
+                <div id="latestTime" style="color: #666; font-size: 0.9em;">--:--:--</div>
+                <div style="margin-top: 15px;">
+                    狀態: <span id="connectionStatus" class="status-offline">等待數據...</span>
+                </div>
             </div>
         </div>
 
-        <!-- 記錄表格 -->
-        <div class="card">
+        <div class="card table-card">
             <h2>📋 詳細記錄清單</h2>
-            <div id="recordsTable" style="overflow-x: auto;">
+            <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th>時間</th>
-                            <th>模式 (Mode)</th>
-                            <th>分數 (Score)</th>
-                            <th>耗時 (Sec)</th>
+                            <th>模式</th>
+                            <th>分數</th>
+                            <th>耗時(s)</th>
                             <th>Session ID</th>
                         </tr>
                     </thead>
                     <tbody id="recordsBody">
-                        <tr>
-                            <td colspan="5" class="loading">請先選擇一個設備...</td>
-                        </tr>
+                        <tr><td colspan="5" class="loading">請選擇設備...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -93,12 +90,9 @@
     </div>
 
     <footer>
-        <p>Memory Bloom System | Firebase 數據同步</p>
-        <p>最後更新: <span id="lastUpdate">--:--:--</span></p>
+        <p>Memory Bloom System | Firebase 實時同步 | 最後更新: <span id="lastUpdate">--:--:--</span></p>
     </footer>
 
-    <!-- 引入自定義腳本 -->
-    <script src="script.js"></script>
+    <script src="script.js?v=1.1"></script>
 </body>
-
 </html>
