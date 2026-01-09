@@ -17,7 +17,33 @@ let currentDevice = null;
 let scoreChart = null;
 let scores = [];
 
-// 初始化圖表
+// 初始化筆記本功能
+function initNoteBoard() {
+    const noteInput = document.getElementById('sysMsgInput');
+    const saveBtn = document.getElementById('sendMsgBtn');
+    const statusText = document.getElementById('currentMsg');
+
+    database.ref('system_note').on('value', (snapshot) => {
+        const val = snapshot.val();
+        if (val) {
+            noteInput.value = val.text || "";
+            statusText.textContent = "最後更新: " + (val.time || "無記錄");
+        }
+    });
+
+    saveBtn.onclick = () => {
+        const text = noteInput.value;
+        const now = new Date().toLocaleString();
+        saveBtn.textContent = "儲存中...";
+        database.ref('system_note').set({ text: text, time: now })
+            .then(() => {
+                saveBtn.textContent = "儲存備註";
+                alert("備註已成功儲存！");
+            });
+    };
+}
+
+// 初始圖表
 function initChart() {
     const ctx = document.getElementById('scoreChart').getContext('2d');
     scoreChart = new Chart(ctx, {
@@ -25,38 +51,18 @@ function initChart() {
         data: {
             labels: [],
             datasets: [{
-                label: '分數',
+                label: '近期分數',
                 data: [],
                 borderColor: '#0277bd',
                 backgroundColor: 'rgba(2, 119, 189, 0.1)',
-                fill: true,
-                tension: 0.3
+                fill: true, tension: 0.3
             }]
         },
         options: { responsive: true, maintainAspectRatio: false }
     });
 }
 
-// 監聽公告
-function initAnnouncement() {
-    const msgDisplay = document.getElementById('currentMsg');
-    const msgInput = document.getElementById('sysMsgInput');
-    const sendBtn = document.getElementById('sendMsgBtn');
-
-    database.ref('system_announcement').on('value', (snapshot) => {
-        msgDisplay.textContent = snapshot.val() || "暫無公告";
-    });
-
-    sendBtn.onclick = () => {
-        const text = msgInput.value;
-        if(text) {
-            database.ref('system_announcement').set(text);
-            msgInput.value = '';
-        }
-    };
-}
-
-// 加載設備
+// 讀取設備
 function loadDevices() {
     database.ref('devices').on('value', (snapshot) => {
         const data = snapshot.val();
@@ -81,13 +87,8 @@ function selectDevice(deviceId) {
         database.ref(`statistics/${currentDevice}`).off();
     }
     currentDevice = deviceId;
-    
-    // 更新 UI 狀態
-    document.querySelectorAll('.device-chip').forEach(el => {
-        el.classList.toggle('active', el.textContent.includes(deviceId));
-    });
+    document.querySelectorAll('.device-chip').forEach(el => el.classList.toggle('active', el.textContent.includes(deviceId)));
 
-    // 監聽數據
     database.ref(`statistics/${deviceId}`).on('value', (snapshot) => {
         const stats = snapshot.val() || {};
         document.getElementById('totalGames').textContent = stats.totalGames || 0;
@@ -111,15 +112,11 @@ function updateUI() {
         document.getElementById('latestMode').textContent = latest.mode;
         document.getElementById('latestTime').textContent = new Date(latest.timestamp*1000).toLocaleTimeString();
         
-        // 更新表格
         scores.forEach(s => {
             const row = tbody.insertRow();
-            row.innerHTML = `<td>${new Date(s.timestamp*1000).toLocaleString()}</td>
-                             <td>${s.mode}</td><td>${s.score}</td>
-                             <td>${s.duration}</td><td>${s.sessionID || 'N/A'}</td>`;
+            row.innerHTML = `<td>${new Date(s.timestamp*1000).toLocaleString()}</td><td>${s.mode}</td><td>${s.score}</td><td>${s.duration}s</td><td>${s.sessionID || 'N/A'}</td>`;
         });
 
-        // 更新圖表
         const chartData = scores.slice(0, 10).reverse();
         scoreChart.data.labels = chartData.map(d => new Date(d.timestamp*1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
         scoreChart.data.datasets[0].data = chartData.map(d => d.score);
@@ -130,6 +127,6 @@ function updateUI() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initChart();
-    initAnnouncement();
+    initNoteBoard();
     loadDevices();
 });
