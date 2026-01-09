@@ -7,18 +7,21 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    color: #333;
+    padding: 20px;
 }
 
 .container {
     width: 100%;
-    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
     flex: 1;
 }
 
-/* --- 第一行佈局 --- */
+/* --- 第一行佈局 (同學的設計) --- */
 .top-row {
     display: grid;
-    grid-template-columns: 400px 1fr; /* 增加左側寬度以容納更多字 */
+    grid-template-columns: 1fr 1.2fr; /* 調整比例 */
     gap: 20px;
     margin-bottom: 20px;
 }
@@ -26,73 +29,128 @@ body {
 .card {
     background: #fff;
     padding: 20px;
-    border: 2px solid #0277bd;
+    border: 2px solid #0277bd; /* 統一藍色邊框 */
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* 左側標題格：實現三行置中 */
+.card h2 {
+    font-size: 1.1em;
+    color: #0277bd;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e1f5fe;
+    padding-bottom: 8px;
+}
+
+/* 左側標題格 */
 .title-card {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* 垂直居中 */
-    align-items: center;     /* 水平居中 */
-    text-align: center;      /* 文字對齊置中 */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
-.title-card h1 {
-    color: #01579b;
-    font-size: 1.8em;
-    margin-bottom: 8px;
-}
-
-.title-card .subtitle {
-    color: #546e7a;
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.title-card .version-info {
-    color: #90a4ae;
-    font-size: 0.85em;
-    letter-spacing: 0.5px;
-}
+.title-card h1 { color: #01579b; font-size: 1.8em; margin-bottom: 8px; }
+.title-card .subtitle { color: #546e7a; font-weight: 600; margin-bottom: 5px; }
+.title-card .version-info { color: #90a4ae; font-size: 0.85em; letter-spacing: 0.5px; }
 
 /* 右側留言格 */
 .note-card { display: flex; flex-direction: column; }
-.note-card h2 { font-size: 1.1em; color: #0277bd; margin-bottom: 10px; border-bottom: 1px solid #e1f5fe; padding-bottom: 5px; }
 .note-card textarea {
     flex: 1;
-    min-height: 100px;
-    padding: 12px;
-    border: 1px solid #e0e0e0;
-    background: #f9f9f9;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid #b0bec5;
+    background: #fafafa;
     resize: none;
-    outline: none;
     font-family: inherit;
+    border-radius: 4px;
 }
+.note-card textarea:focus { border-color: #0277bd; outline: none; background: #fff; }
 .note-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 #currentMsg { font-size: 0.8em; color: #777; }
-#sendMsgBtn { background: #0277bd; color: white; border: none; padding: 7px 20px; cursor: pointer; font-weight: bold; }
+#sendMsgBtn { background: #0277bd; color: white; border: none; padding: 6px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: background 0.2s; }
+#sendMsgBtn:hover { background: #01579b; }
 
-/* --- 其它區域 --- */
+/* --- 設備與控制區 (合併佈局) --- */
+.device-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.device-list { display: flex; gap: 10px; flex-wrap: wrap; }
+.device-chip { 
+    padding: 8px 12px; 
+    border: 1px solid #cfd8dc; 
+    cursor: pointer; 
+    background: #f5f5f5; 
+    border-radius: 4px; 
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+.device-chip:hover { border-color: #0277bd; color: #0277bd; }
+.device-chip.active { background: #0277bd; color: #fff; border-color: #01579b; }
+
+/* 控制面板樣式 */
+.control-panel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #e3f2fd;
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: 1px solid #90caf9;
+}
+.panel-title { font-size: 0.85em; font-weight: bold; color: #0277bd; margin-right: 5px; }
+.status-indicator { font-size: 0.9em; margin-right: 10px; }
+.diff-badge { font-weight: bold; color: #01579b; }
+
+.btn-group { display: flex; gap: 5px; }
+.btn-ctrl {
+    border: 1px solid #0277bd;
+    background: #fff;
+    color: #0277bd;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 0.85em;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.btn-ctrl:hover { background: #0277bd; color: #fff; }
+.cmd-feedback { font-size: 0.8em; color: #2e7d32; font-weight: bold; margin-left: 8px; }
+
+/* --- 儀表板 --- */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     margin: 20px 0;
 }
-.stat-group { display: flex; gap: 40px; }
-.stat-number { font-size: 3em; font-weight: 800; color: #0277bd; }
-.device-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-.device-chip { padding: 8px 15px; border: 2px solid #e0e0e0; cursor: pointer; }
-.device-chip.active { background: #0277bd; color: #fff; border-color: #0277bd; }
-.chart-container { height: 250px; position: relative; }
-.table-responsive { width: 100%; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-th, td { padding: 12px; border: 1px solid #0277bd; }
-th { background: #e1f5fe; color: #01579b; }
+.stat-group { display: flex; justify-content: space-around; text-align: center; }
+.stat-number { font-size: 2.5em; font-weight: 800; color: #0277bd; }
+.stat-label { color: #607d8b; font-size: 0.9em; margin-top: 5px; }
 
-footer { text-align: center; padding: 20px; background: #fff; border-top: 2px solid #0277bd; margin-top: auto; }
+.chart-container { height: 220px; position: relative; }
+
+/* 狀態標籤 */
+.status-online { color: #2e7d32; font-weight: bold; background: #e8f5e9; padding: 3px 8px; border-radius: 4px; font-size: 0.9em; }
+.status-offline { color: #c62828; font-weight: bold; background: #ffebee; padding: 3px 8px; border-radius: 4px; font-size: 0.9em; }
+
+/* 表格 */
+.table-responsive { width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.95em; }
+th, td { padding: 10px 12px; border: 1px solid #e0e0e0; text-align: left; }
+th { background: #e1f5fe; color: #01579b; border-color: #0277bd; }
+td { border-color: #bbdefb; }
+
+footer { text-align: center; padding: 20px; color: #90a4ae; border-top: 2px solid #0277bd; margin-top: auto; font-size: 0.85em; }
+.loading { color: #999; font-style: italic; padding: 20px; text-align: center; }
 
 @media (max-width: 900px) {
     .top-row { grid-template-columns: 1fr; }
+    .control-panel { width: 100%; justify-content: space-between; margin-top: 10px; }
 }

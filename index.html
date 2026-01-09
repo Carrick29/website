@@ -7,31 +7,51 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css?v=1.3">
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
     <div class="container">
+        <!-- 頂部資訊列 (同學新增的功能) -->
         <div class="top-row">
             <div class="card title-card">
                 <h1>🎮 Memory Bloom</h1>
                 <p class="subtitle">遊戲數據實時監控與分析系統</p>
-                <p class="version-info">系統版本 v2.4.0 | 雲端同步技術支援</p>
+                <p class="version-info">系統版本 v2.5.0 (Merged) | 遠程醫療支援</p>
             </div>
 
             <div class="card note-card">
-                <h2>📝 設備備註與紀錄</h2>
+                <h2>📝 護理備註</h2>
                 <textarea id="sysMsgInput" placeholder="在此輸入設備狀況、筆記或交接事項..."></textarea>
                 <div class="note-footer">
-                    <span id="currentMsg">最後更新：讀取中...</span>
-                    <button id="sendMsgBtn">儲存備註</button>
+                    <span id="currentMsg">讀取中...</span>
+                    <button id="sendMsgBtn">儲存</button>
                 </div>
             </div>
         </div>
 
+        <!-- 設備選擇與控制區 (已合併遠程控制功能) -->
         <div class="card">
-            <h2>📱 選擇監控設備</h2>
-            <div class="device-list" id="deviceList">
-                <div class="loading">正在搜尋 Firebase 中的設備...</div>
+            <h2>📱 選擇設備與控制</h2>
+            
+            <div class="device-toolbar">
+                <!-- 左側：設備列表 -->
+                <div class="device-list" id="deviceList">
+                    <div class="loading">正在搜尋 Firebase 中的設備...</div>
+                </div>
+
+                <!-- 右側：遠程控制面板 (選中設備後顯示) -->
+                <div class="control-panel" id="remoteControls" style="display: none;">
+                    <div class="panel-title">遠程難度控制</div>
+                    <div class="status-indicator">
+                        當前: <span id="currentDiff" class="diff-badge">--</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-ctrl btn-easy" onclick="setDifficulty(0)">Easy</button>
+                        <button class="btn-ctrl btn-hard" onclick="setDifficulty(1)">Hard</button>
+                        <button class="btn-ctrl btn-auto" onclick="setDifficulty(2)">Auto</button>
+                    </div>
+                    <span id="cmdStatus" class="cmd-feedback"></span>
+                </div>
             </div>
         </div>
 
@@ -61,7 +81,7 @@
                 <h2>🎯 最新一局</h2>
                 <div class="stat-number" id="latestScore">0</div>
                 <div class="stat-label">分數</div>
-                <div id="latestMode" style="font-weight: bold; margin-bottom: 5px;">--</div>
+                <div id="latestMode" style="font-weight: bold; margin-bottom: 5px; color: #0277bd;">--</div>
                 <div id="latestTime" style="color: #666; font-size: 0.85em;">--:--:--</div>
                 <div style="margin-top: 15px;">
                     狀態: <span id="connectionStatus" class="status-offline">等待數據...</span>
@@ -94,6 +114,6 @@
         <p>Memory Bloom | Firebase 實時同步 | 最後更新: <span id="lastUpdate">--:--:--</span></p>
     </footer>
 
-    <script src="script.js?v=1.3"></script>
+    <script src="script.js?v=2.0"></script>
 </body>
 </html>
