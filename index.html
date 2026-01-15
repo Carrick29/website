@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css?v=2.1">
+    <link rel="stylesheet" href="style.css?v=2.2">
 </head>
 <body>
     <div class="container">
@@ -15,15 +15,30 @@
             <div class="card title-card">
                 <h1>🎮 Memory Bloom</h1>
                 <p class="subtitle">遊戲數據實時監控與分析系統</p>
-                <p class="version-info">系統版本 v2.5.0 (Merged) | 遠程醫療支援</p>
+                <p class="version-info">系統版本 v2.6.0 | 聊天式護理紀錄</p>
             </div>
 
             <div class="card note-card">
-                <h2>📝 護理備註</h2>
-                <textarea id="sysMsgInput" placeholder="在此輸入設備狀況、筆記或交接事項..."></textarea>
-                <div class="note-footer">
-                    <span id="currentMsg">讀取中...</span>
-                    <button id="sendMsgBtn">儲存備註</button>
+                <h2>💬 護理備註紀錄</h2>
+                <div id="chatHistory" class="chat-history">
+                    <div class="loading">正在讀取紀錄...</div>
+                </div>
+                
+                <div class="chat-input-group">
+                    <div class="role-selector">
+                        <input type="text" id="roleInput" placeholder="角色 (如: 護理師)" list="rolePresets">
+                        <datalist id="rolePresets">
+                            <option value="護理師">
+                            <option value="主治醫師">
+                            <option value="復健師">
+                            <option value="家屬">
+                        </datalist>
+                    </div>
+                    <textarea id="sysMsgInput" placeholder="在此輸入筆記或交接事項..."></textarea>
+                    <div class="note-footer">
+                        <span id="currentMsg">Ready</span>
+                        <button id="sendMsgBtn">發送</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,6 +122,6 @@
         <p>Memory Bloom | Firebase 實時同步 | 最後更新: <span id="lastUpdate">--:--:--</span></p>
     </footer>
 
-    <script src="script.js?v=2.1"></script>
+    <script src="script.js?v=2.2"></script>
 </body>
 </html>
