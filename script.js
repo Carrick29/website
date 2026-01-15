@@ -16,25 +16,61 @@ let currentDevice = null;
 let scoreChart = null;
 let scores = [];
 
+// --- 護理備註功能 (WhatsApp Style) ---
 function initNoteBoard() {
     const noteInput = document.getElementById('sysMsgInput');
+    const roleInput = document.getElementById('roleInput');
     const saveBtn = document.getElementById('sendMsgBtn');
+    const chatHistory = document.getElementById('chatHistory');
     const statusText = document.getElementById('currentMsg');
+
+    // 監聽 Firebase 數據變化
     database.ref('system_note').on('value', (snapshot) => {
-        const val = snapshot.val();
-        if (val) {
-            if (!noteInput.value) noteInput.value = val.text || "";
-            statusText.textContent = "最後更新: " + (val.time || "無記錄");
+        const data = snapshot.val();
+        chatHistory.innerHTML = ''; 
+        
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const msg = data[key];
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'message-bubble';
+                msgDiv.innerHTML = `
+                    <div class="message-role">${msg.role || '系統'}</div>
+                    <div class="message-text">${msg.text}</div>
+                    <div class="message-time">${msg.time}</div>
+                `;
+                chatHistory.appendChild(msgDiv);
+            });
+            // 自動捲動到底部
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        } else {
+            chatHistory.innerHTML = '<div class="loading">尚無對話紀錄</div>';
         }
     });
+
+    // 發送按鈕
     saveBtn.onclick = () => {
-        const text = noteInput.value;
-        const now = new Date().toLocaleString();
-        saveBtn.textContent = "儲存中...";
-        database.ref('system_note').set({ text: text, time: now }).then(() => { saveBtn.textContent = "儲存備註"; alert("儲存成功"); });
+        const text = noteInput.value.trim();
+        const role = roleInput.value.trim() || "未命名角色";
+        
+        if (!text) return;
+
+        const now = new Date().toLocaleString('zh-TW', { hour12: false });
+        saveBtn.disabled = true;
+
+        database.ref('system_note').push({
+            role: role,
+            text: text,
+            time: now
+        }).then(() => {
+            saveBtn.disabled = false;
+            noteInput.value = ""; // 清空輸入區
+            statusText.textContent = "已發送: " + now;
+        });
     };
 }
 
+// --- 設備控制 ---
 function setDifficulty(level) {
     if (!currentDevice) return;
     const cmdStatus = document.getElementById('cmdStatus');
@@ -43,6 +79,7 @@ function setDifficulty(level) {
         .then(() => { cmdStatus.textContent = "✅ 已同步"; setTimeout(() => { cmdStatus.textContent = ""; }, 3000); })
 }
 
+// --- 圖表初始化 ---
 function initChart() {
     const ctx = document.getElementById('scoreChart').getContext('2d');
     if(scoreChart) scoreChart.destroy();
@@ -53,6 +90,7 @@ function initChart() {
     });
 }
 
+// --- 讀取設備列表 ---
 function loadDevices() {
     const deviceList = document.getElementById('deviceList');
     database.ref('devices').on('value', (snapshot) => {
@@ -71,6 +109,7 @@ function loadDevices() {
     });
 }
 
+// --- 選擇特定設備 ---
 function selectDevice(deviceId) {
     if (currentDevice) {
         database.ref(`devices/${currentDevice}/sessions`).off();
@@ -80,8 +119,8 @@ function selectDevice(deviceId) {
     }
     currentDevice = deviceId;
     document.getElementById('remoteControls').style.display = 'flex';
-    document.querySelectorAll('.device-chip').forEach(el => el.classList.toggle('active', el.innerText.includes(deviceId)));
-
+    
+    // 更新 UI 狀態
     database.ref(`devices/${deviceId}/status/difficulty`).on('value', (snapshot) => {
         const val = snapshot.val();
         const badge = document.getElementById('currentDiff');
