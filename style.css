@@ -2,7 +2,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Segoe UI', "Microsoft JhengHei", Arial, sans-serif;
     background-color: #f0f4f7;
     min-height: 100vh;
     display: flex;
@@ -27,86 +27,97 @@ body {
     background: #fff;
     padding: 20px;
     border: 2px solid #0277bd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .card h2 {
-    font-size: 1.1em;
+    font-size: 1.3em; /* 標題放大 */
     color: #0277bd;
-    margin-bottom: 12px;
-    border-bottom: 1px solid #e1f5fe;
-    padding-bottom: 8px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e1f5fe;
+    padding-bottom: 10px;
 }
 
-/* --- 聊天功能樣式 (WhatsApp Style) --- */
+/* --- 聊天功能樣式升級 (字體放大版) --- */
 .note-card {
     display: flex;
     flex-direction: column;
-    height: 450px; /* 固定高度讓聊天紀錄可滾動 */
+    height: 550px; /* 稍微增加高度，讓視覺更飽滿 */
 }
 
 .chat-history {
     flex: 1;
     overflow-y: auto;
-    background: #e5ddd5; /* WhatsApp 背景色 */
-    padding: 15px;
+    background: #e5ddd5; 
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px; /* 增加訊息之間的間距 */
     border: 1px solid #b0bec5;
 }
 
 .message-bubble {
     background: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    max-width: 80%;
+    padding: 12px 18px; /* 增加氣泡內邊距 */
+    border-radius: 12px;
+    max-width: 85%;
     align-self: flex-start;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
 }
 
+/* 角色字體放大 */
 .message-role {
-    font-size: 0.75em;
-    font-weight: bold;
-    color: #0277bd;
-    margin-bottom: 3px;
+    font-size: 1.0em; 
+    font-weight: 800;
+    color: #01579b;
+    margin-bottom: 6px;
+    display: block;
+    border-bottom: 1px solid #eee;
 }
 
+/* 訊息本文放大 */
 .message-text {
-    font-size: 0.95em;
-    color: #262626;
-    line-height: 1.4;
+    font-size: 1.25em; /* 顯著放大字體 */
+    color: #1a1a1a;
+    line-height: 1.6; /* 增加行高讓閱讀更舒服 */
     white-space: pre-wrap;
+    word-break: break-all;
 }
 
+/* 時間字體放大 */
 .message-time {
-    font-size: 0.7em;
-    color: #8e8e8e;
+    font-size: 0.85em;
+    color: #757575;
     text-align: right;
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
+/* 輸入區域優化 */
 .chat-input-group {
-    margin-top: 10px;
+    margin-top: 15px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 #roleInput {
-    padding: 6px 10px;
-    border: 1px solid #cfd8dc;
-    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #cfd8dc;
+    font-size: 1.1em;
     font-weight: bold;
+    border-radius: 4px;
 }
 
 #sysMsgInput {
     width: 100%;
-    height: 60px;
-    padding: 10px;
-    border: 1px solid #cfd8dc;
+    height: 80px; /* 增加輸入框高度 */
+    padding: 12px;
+    border: 2px solid #cfd8dc;
+    font-size: 1.15em;
     resize: none;
     font-family: inherit;
+    border-radius: 4px;
 }
 
 .note-footer {
@@ -115,15 +126,24 @@ body {
     align-items: center;
 }
 
+#currentMsg {
+    font-size: 0.95em;
+    color: #546e7a;
+}
+
 #sendMsgBtn {
     background: #0277bd;
     color: white;
     border: none;
-    padding: 8px 25px;
+    padding: 12px 35px; /* 放大按鈕 */
     cursor: pointer;
     font-weight: bold;
+    font-size: 1.1em;
+    transition: background 0.2s;
+    border-radius: 4px;
 }
 
+#sendMsgBtn:hover { background: #01579b; }
 #sendMsgBtn:disabled { background: #90a4ae; }
 
 /* --- 儀表板與數據 --- */
@@ -134,31 +154,26 @@ body {
     margin-bottom: 20px;
 }
 
-.stat-group { display: flex; justify-content: space-around; text-align: center; }
-.stat-number { font-size: 2.5em; font-weight: 800; color: #0277bd; }
-.stat-label { font-size: 0.9em; color: #546e7a; }
+.stat-number { font-size: 3em; font-weight: 800; color: #0277bd; }
+.stat-label { font-size: 1em; color: #546e7a; font-weight: bold; }
 
-.chart-container { height: 250px; }
+.chart-container { height: 300px; }
 
 /* --- 設備控制區 --- */
-.device-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-.device-list { display: flex; gap: 8px; }
-.device-chip { padding: 8px 15px; border: 1px solid #cfd8dc; cursor: pointer; background: #f5f5f5; }
-.device-chip.active { background: #0277bd; color: white; }
+.device-chip { 
+    padding: 10px 20px; 
+    font-size: 1.1em; 
+    border: 2px solid #cfd8dc; 
+    cursor: pointer; 
+    font-weight: 500;
+}
+.device-chip.active { background: #0277bd; color: white; border-color: #01579b; }
 
-.control-panel { display: flex; align-items: center; gap: 15px; background: #e3f2fd; padding: 10px; border: 1px solid #90caf9; }
-.btn-ctrl { border: 1px solid #0277bd; background: #fff; padding: 5px 10px; cursor: pointer; font-weight: bold; }
+/* --- 表格字體放大 --- */
+table { font-size: 1.05em; }
+th, td { padding: 15px 12px; }
 
-/* --- 表格樣式 --- */
-.table-responsive { width: 100%; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th, td { padding: 12px; border: 1px solid #e0e0e0; text-align: left; }
-th { background: #f5f5f5; color: #0277bd; }
-
-.status-online { color: #2e7d32; font-weight: bold; }
-.status-offline { color: #c62828; font-weight: bold; }
-
-footer { text-align: center; padding: 20px; color: #90a4ae; font-size: 0.9em; }
+footer { padding: 30px; font-size: 1em; }
 
 @media (max-width: 900px) {
     .top-row { grid-template-columns: 1fr; }
