@@ -7,43 +7,61 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css?v=2.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
     <div class="container">
-        <!-- 頂部資訊列 (同學新增的功能) -->
         <div class="top-row">
             <div class="card title-card">
                 <h1>🎮 Memory Bloom</h1>
                 <p class="subtitle">遊戲數據實時監控與分析系統</p>
-                <p class="version-info">系統版本 v2.5.0 (Merged) | 遠程醫療支援</p>
+                <p class="version-info">系統版本 v3.0.0 (Chat Log) | 遠程醫療支援</p>
             </div>
 
             <div class="card note-card">
-                <h2>📝 護理備註</h2>
-                <textarea id="sysMsgInput" placeholder="在此輸入設備狀況、筆記或交接事項..."></textarea>
-                <div class="note-footer">
-                    <span id="currentMsg">讀取中...</span>
-                    <button id="sendMsgBtn">儲存</button>
+                <h2>💬 護理通訊錄</h2>
+                
+                <div id="chatHistory" class="chat-history-box">
+                    <div class="chat-placeholder">暫無留言記錄...</div>
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="role-selector-container">
+                        <label for="noteRole">身分：</label>
+                        <select id="noteRole" class="role-select">
+                            <option value="護理師">👩‍⚕️ 護理師</option>
+                            <option value="主治醫師">👨‍⚕️ 主治醫師</option>
+                            <option value="復健師">🧘 復健師</option>
+                            <option value="家屬">🏠 家屬</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <textarea id="sysMsgInput" placeholder="輸入訊息..."></textarea>
+                        <button id="sendMsgBtn">發送</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 設備選擇與控制區 (已合併遠程控制功能) -->
         <div class="card">
-            <h2>📱 選擇設備與控制</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin-bottom: 0; border: none;">📱 設備管理中心</h2>
+                <button onclick="openReportModal()" class="btn-report" id="reportBtn" style="display: none;">
+                    📄 生成醫療報告
+                </button>
+            </div>
             
             <div class="device-toolbar">
-                <!-- 左側：設備列表 -->
                 <div class="device-list" id="deviceList">
                     <div class="loading">正在搜尋 Firebase 中的設備...</div>
                 </div>
 
-                <!-- 右側：遠程控制面板 (選中設備後顯示) -->
                 <div class="control-panel" id="remoteControls" style="display: none;">
-                    <div class="panel-title">遠程難度控制</div>
+                    <div class="panel-title">遠程控制</div>
                     <div class="status-indicator">
-                        當前: <span id="currentDiff" class="diff-badge">--</span>
+                        難度: <span id="currentDiff" class="diff-badge">--</span>
                     </div>
                     <div class="btn-group">
                         <button class="btn-ctrl btn-easy" onclick="setDifficulty(0)">Easy</button>
@@ -114,6 +132,55 @@
         <p>Memory Bloom | Firebase 實時同步 | 最後更新: <span id="lastUpdate">--:--:--</span></p>
     </footer>
 
-    <script src="script.js?v=2.0"></script>
+    <div id="reportModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📋 認知訓練分析報告</h3>
+                <span class="close-btn" onclick="closeReportModal()">&times;</span>
+            </div>
+            
+            <div id="printableArea" class="report-body">
+                <div class="report-title-section">
+                    <h2>Memory Bloom 訓練評估報告</h2>
+                    <p>Training Assessment Report</p>
+                </div>
+                <hr>
+                <div class="report-info">
+                    <p><strong>受測設備/使用者：</strong> <span id="rpt-device-name">--</span></p>
+                    <p><strong>報告生成時間：</strong> <span id="rpt-date">--</span></p>
+                    <p><strong>數據樣本數：</strong> <span id="rpt-sample-count">0</span> 局</p>
+                </div>
+
+                <div class="report-section">
+                    <h4>📊 綜合表現分析</h4>
+                    <p id="rpt-summary-text" class="analysis-text">正在分析數據...</p>
+                </div>
+
+                <div class="report-section">
+                    <h4>💡 醫師/AI 建議 (Rule-based)</h4>
+                    <ul id="rpt-suggestions" class="suggestion-list">
+                        <li>正在生成建議...</li>
+                    </ul>
+                </div>
+                
+                <div class="report-section">
+                    <h4>📝 近期護理留言記錄</h4>
+                    <ul id="rpt-note-list" class="report-msg-list">
+                        </ul>
+                </div>
+                
+                <div class="report-footer">
+                    <p>本報告由 Memory Bloom 系統自動生成，僅供參考，不作為正式醫療診斷依據。</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeReportModal()">關閉</button>
+                <button class="btn-download" onclick="downloadPDF()">📥 下載 PDF 報告</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=3.0"></script>
 </body>
 </html>
