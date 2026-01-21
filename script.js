@@ -76,7 +76,8 @@ function setDifficulty(level) {
     const cmdStatus = document.getElementById('cmdStatus');
     cmdStatus.textContent = "發送中...";
     database.ref(`devices/${currentDevice}/control/difficulty`).set(level)
-        .then(() => { cmdStatus.textContent = "✅ 已同步"; setTimeout(() => { cmdStatus.textContent = ""; }, 3000); })
+        .then(() => { cmdStatus.textContent = "✅ 已發送"; setTimeout(() => { cmdStatus.textContent = ""; }, 3000); })
+        .catch((e) => { cmdStatus.textContent = "❌ 失敗"; console.error(e); });
 }
 
 // --- 圖表初始化 ---

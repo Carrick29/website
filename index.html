@@ -43,16 +43,22 @@
             </div>
         </div>
 
+        <!-- 設備選擇與控制區 (已合併遠程控制功能) -->
         <div class="card">
             <h2>📱 選擇設備與控制</h2>
+            
             <div class="device-toolbar">
+                <!-- 左側：設備列表 -->
                 <div class="device-list" id="deviceList">
                     <div class="loading">正在搜尋 Firebase 中的設備...</div>
                 </div>
 
+                <!-- 右側：遠程控制面板 (選中設備後顯示) -->
                 <div class="control-panel" id="remoteControls" style="display: none;">
                     <div class="panel-title">遠程難度控制</div>
-                    <div class="status-indicator">當前: <span id="currentDiff" class="diff-badge">--</span></div>
+                    <div class="status-indicator">
+                        當前: <span id="currentDiff" class="diff-badge">--</span>
+                    </div>
                     <div class="btn-group">
                         <button class="btn-ctrl btn-easy" onclick="setDifficulty(0)">Easy</button>
                         <button class="btn-ctrl btn-hard" onclick="setDifficulty(1)">Hard</button>

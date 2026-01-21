@@ -159,15 +159,27 @@ body {
 
 .chart-container { height: 300px; }
 
-/* --- 設備控制區 --- */
-.device-chip { 
-    padding: 10px 20px; 
-    font-size: 1.1em; 
-    border: 2px solid #cfd8dc; 
-    cursor: pointer; 
-    font-weight: 500;
+/* --- 設備與控制區 (合併佈局) --- */
+.device-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
 }
-.device-chip.active { background: #0277bd; color: white; border-color: #01579b; }
+
+.device-list { display: flex; gap: 10px; flex-wrap: wrap; }
+.device-chip { 
+    padding: 8px 12px; 
+    border: 1px solid #cfd8dc; 
+    cursor: pointer; 
+    background: #f5f5f5; 
+    border-radius: 4px; 
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+.device-chip:hover { border-color: #0277bd; color: #0277bd; }
+.device-chip.active { background: #0277bd; color: #fff; border-color: #01579b; }
 
 /* --- 表格字體放大 --- */
 table { font-size: 1.05em; }
