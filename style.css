@@ -181,6 +181,34 @@ body {
 .device-chip:hover { border-color: #0277bd; color: #0277bd; }
 .device-chip.active { background: #0277bd; color: #fff; border-color: #01579b; }
 
+/* 控制面板樣式 */
+.control-panel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #e3f2fd;
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: 1px solid #90caf9;
+}
+.panel-title { font-size: 0.85em; font-weight: bold; color: #0277bd; margin-right: 5px; }
+.status-indicator { font-size: 0.9em; margin-right: 10px; }
+.diff-badge { font-weight: bold; color: #01579b; }
+
+.btn-group { display: flex; gap: 5px; }
+.btn-ctrl {
+    border: 1px solid #0277bd;
+    background: #fff;
+    color: #0277bd;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 0.85em;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.btn-ctrl:hover { background: #0277bd; color: #fff; }
+.cmd-feedback { font-size: 0.8em; color: #2e7d32; font-weight: bold; margin-left: 8px; }
+
 /* --- 表格字體放大 --- */
 table { font-size: 1.05em; }
 th, td { padding: 15px 12px; }
