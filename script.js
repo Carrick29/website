@@ -87,7 +87,7 @@ function initChart() {
     scoreChart = new Chart(ctx, {
         type: 'line',
         data: { labels: [], datasets: [{ label: '分數', data: [], borderColor: '#0277bd', backgroundColor: 'rgba(2,119,189,0.1)', fill: true, tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { responsive: false, maintainAspectRatio: false }
     });
 }
 
