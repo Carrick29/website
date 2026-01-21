@@ -26,22 +26,18 @@ function initChatSystem() {
     const sendBtn = document.getElementById('sendMsgBtn');
     const roleSelect = document.getElementById('noteRole');
 
-    // 讀取留言列表 (使用 nursing_logs 作為新節點，避免與舊資料衝突)
     database.ref('nursing_logs').on('value', (snapshot) => {
-        chatBox.innerHTML = ''; // 清空畫面
-        allChatLogs = []; // 清空暫存
+        chatBox.innerHTML = ''; 
+        allChatLogs = []; 
         
         const logs = snapshot.val();
         if (!logs) {
-            chatBox.innerHTML = '<div class="chat-placeholder">暫無留言記錄，開始第一條備註吧...</div>';
+            chatBox.innerHTML = '<div class="chat-placeholder">暫無留言記錄...</div>';
             return;
         }
 
-        // 遍歷所有留言 (Firebase 物件轉陣列)
         Object.values(logs).forEach(log => {
-            allChatLogs.push(log); // 存入暫存供報告用
-            
-            // 建立卡片 DOM
+            allChatLogs.push(log);
             const msgDiv = document.createElement('div');
             msgDiv.className = `chat-message role-${getRoleClass(log.role)}`;
             
@@ -54,28 +50,23 @@ function initChatSystem() {
             `;
             chatBox.appendChild(msgDiv);
         });
-
-        // 自動捲動到底部
         chatBox.scrollTop = chatBox.scrollHeight;
     });
 
-    // 發送留言
     sendBtn.onclick = () => {
         const text = noteInput.value.trim();
         const role = roleSelect.value;
-        
         if (!text) return;
 
         sendBtn.textContent = "發送中...";
         sendBtn.disabled = true;
 
-        // 使用 push() 來新增一條記錄，而不是 set() 覆蓋
         database.ref('nursing_logs').push({
             role: role,
             text: text,
             time: new Date().toLocaleString()
         }).then(() => {
-            noteInput.value = ''; // 清空輸入框
+            noteInput.value = '';
             sendBtn.textContent = "發送";
             sendBtn.disabled = false;
         }).catch(e => {
@@ -87,7 +78,6 @@ function initChatSystem() {
     };
 }
 
-// 輔助：根據角色回傳 CSS class 對應顏色
 function getRoleClass(role) {
     if (role === '護理師') return 'nurse';
     if (role === '主治醫師') return 'doctor';
@@ -96,14 +86,9 @@ function getRoleClass(role) {
     return 'default';
 }
 
-// 輔助：防止 HTML 注入
 function escapeHtml(text) {
     if (!text) return "";
-    return text.replace(/&/g, "&amp;")
-               .replace(/</g, "&lt;")
-               .replace(/>/g, "&gt;")
-               .replace(/"/g, "&quot;")
-               .replace(/'/g, "&#039;");
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 // 遠程控制
@@ -136,10 +121,8 @@ function loadDevices() {
         Object.keys(data).forEach(mac => {
             const btn = document.createElement('div');
             btn.className = 'device-chip' + (currentDevice === mac ? ' active' : '');
-            
             const name = data[mac].info?.name || mac;
             btn.innerHTML = `📡 ${name}`;
-            
             btn.onclick = () => selectDevice(mac, name);
             deviceList.appendChild(btn);
         });
@@ -244,17 +227,20 @@ function closeReportModal() {
     document.getElementById('reportModal').style.display = 'none';
 }
 
+// --- v3.1 核心修改：針對阿茲海默症的分析邏輯 ---
 function analyzeAndGenerateReport() {
+    // 1. 動態修改標題，使其更符合醫療情境
+    document.querySelector('.report-title-section h2').textContent = "Memory Bloom 認知功能追蹤報告";
+    document.querySelector('.report-title-section p').textContent = "Cognitive Function Monitoring Report";
+
     document.getElementById('rpt-device-name').textContent = currentDeviceName || currentDevice;
     document.getElementById('rpt-date').textContent = new Date().toLocaleString();
     document.getElementById('rpt-sample-count').textContent = scores.length;
     
-    // --- 報告新功能：顯示最近 3 條留言 ---
+    // 留言列表
     const rptList = document.getElementById('rpt-note-list');
     rptList.innerHTML = '';
-    
     if (allChatLogs.length > 0) {
-        // 取最後 3 條
         const recentLogs = allChatLogs.slice(-3).reverse();
         recentLogs.forEach(log => {
             const li = document.createElement('li');
@@ -265,6 +251,7 @@ function analyzeAndGenerateReport() {
         rptList.innerHTML = '<li style="font-style:italic;">暫無留言記錄</li>';
     }
 
+    // 計算平均數據
     const recentGames = scores.slice(0, 5);
     const avgRecent = recentGames.reduce((sum, s) => sum + parseInt(s.score), 0) / recentGames.length;
     
@@ -276,28 +263,36 @@ function analyzeAndGenerateReport() {
         hasHistory = true;
     }
 
-    let summaryText = `根據系統記錄，該使用者近期共進行了 ${scores.length} 次認知訓練。最近 5 局的平均得分為 ${avgRecent.toFixed(1)} 分。`;
+    // 2. 分析文案生成 (Alzheimer's Focused)
+    let summaryText = `根據系統監測，長者在近期共進行了 ${scores.length} 次認知復健訓練。最近 5 次訓練的平均準確度評分為 ${avgRecent.toFixed(1)} 分。`;
     let suggestions = [];
 
     if (hasHistory) {
         if (avgRecent > avgOld * 1.1) {
-            summaryText += ` 與前一階段相比，使用者的表現有明顯提升（增長約 ${((avgRecent - avgOld)/avgOld*100).toFixed(0)}%），顯示反應能力正在改善。`;
-            suggestions.push("📈 訓練效果顯著：建議維持目前的訓練頻率，並可嘗試切換到 'Hard' 模式以提供適當的挑戰。");
+            // 進步情境
+            summaryText += ` 數據顯示長者的短期記憶與反應力有回升跡象（提升約 ${((avgRecent - avgOld)/avgOld*100).toFixed(0)}%）。這顯示目前的訓練強度適中，有助於活化腦部神經連結 (Neuroplasticity)。`;
+            suggestions.push("🧠 認知強化：建議維持目前的互動頻率，適度給予讚美以增強長者的自信心。");
+            suggestions.push("💪 難度調整：若長者表現輕鬆，可嘗試微調至 'Auto' 或 'Hard' 模式以提供適當的認知刺激。");
         } else if (avgRecent < avgOld * 0.9) {
-            summaryText += ` 近期表現略有波動，平均分數較前一階段下降。可能受精神狀態或疲勞影響。`;
-            suggestions.push("😴 注意休息：數據顯示專注力可能下降，建議在訓練前確保使用者有充足的睡眠。");
+            // 退步情境
+            summaryText += ` 近期認知表現出現波動，準確率較前一階段下降。對於阿茲海默症患者，這可能與情緒焦慮、睡眠品質或生理不適有關。`;
+            suggestions.push("❤️ 情緒安撫：請觀察長者是否有焦慮或「日落症候群 (Sundowning)」現象，訓練時請保持耐心，避免強迫。");
+            suggestions.push("📅 生活規律：建議固定訓練時間，建立穩定的生活作息有助於穩定認知狀態。");
         } else {
-            summaryText += ` 整體表現保持穩定，這對於認知障礙的延緩是非常積極的信號。`;
-            suggestions.push("✅ 持續監測：目前狀況穩定，建議繼續鼓勵使用者每日進行至少 10 分鐘的練習。");
+            // 穩定情境 (對於失智症，這就是好事！)
+            summaryText += ` 認知狀態保持穩定。對於神經退化性疾病而言，「不退步」即是相當正面的指標，顯示目前的照護與訓練策略有效。`;
+            suggestions.push("✅ 持續復健：請繼續鼓勵長者每日進行少量多次的練習，保持大腦活躍度。");
+            suggestions.push("🏠 環境支持：確保訓練環境安靜、光線充足，減少分心因素。");
         }
     } else {
-        summaryText += " 由於歷史數據不足，暫無法分析長期趨勢。";
-        suggestions.push("ℹ️ 建立基準：請繼續累積更多訓練數據以便系統建立更準確的個人化模型。");
+        summaryText += " 系統正在建立個人的認知基準線 (Baseline)。持續的數據積累將有助於更精準地評估病情發展。";
+        suggestions.push("ℹ️ 建立習慣：初期建議以「陪伴」為主，讓長者熟悉設備操作，減少對科技產品的排斥感。");
     }
 
+    // 檢查單次低分 (可能是心情不好或太累)
     const lastGame = scores[0];
-    if (lastGame.score < 50) {
-        suggestions.push("💪 鼓勵機制：最近一次分數較低，請家屬多給予口頭鼓勵，避免使用者產生挫折感。");
+    if (lastGame.score < 2) { // 假設分數很低
+        suggestions.push("⚠️ 狀態關注：最新一次訓練分數較低，請確認長者是否疲勞或身體不適。");
     }
 
     document.getElementById('rpt-summary-text').textContent = summaryText;
@@ -315,7 +310,7 @@ function downloadPDF() {
     const element = document.getElementById('printableArea');
     const opt = {
         margin:       10,
-        filename:     `MemoryBloom_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+        filename:     `MemoryBloom_CareReport_${new Date().toISOString().slice(0,10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -332,6 +327,6 @@ function downloadPDF() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initChart();
-    initChatSystem(); // 改名為 initChatSystem
+    initChatSystem();
     loadDevices();
 });
