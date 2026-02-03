@@ -1,45 +1,47 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Bloom - 數據監控中心</title>
+    <title>Memory Bloom - Data Monitoring Center</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=3.0">
+    <link rel="stylesheet" href="style.css?v=3.2">
 </head>
 <body>
     <div class="container">
+        <button id="langBtn" class="btn-lang">🌐 中文</button>
+
         <div class="top-row">
             <div class="card title-card">
                 <h1>🎮 Memory Bloom</h1>
-                <p class="subtitle">遊戲數據實時監控與分析系統</p>
-                <p class="version-info">系統版本 v3.0.0 (Chat Log) | 遠程醫療支援</p>
+                <p class="subtitle" data-i18n="subtitle">Real-time Game Data Monitoring & Analysis System</p>
+                <p class="version-info" data-i18n="version">System Version v3.3.0 (i18n-separated)</p>
             </div>
 
             <div class="card note-card">
-                <h2>💬 護理通訊錄</h2>
+                <h2 data-i18n="nursingNotes">💬 Nursing Communication Log</h2>
                 
                 <div id="chatHistory" class="chat-history-box">
-                    <div class="chat-placeholder">暫無留言記錄...</div>
+                    <div class="chat-placeholder" data-i18n="noLogs">No records yet...</div>
                 </div>
 
                 <div class="chat-input-area">
                     <div class="role-selector-container">
-                        <label for="noteRole">身分：</label>
+                        <label for="noteRole" data-i18n="roleLabel">Role:</label>
                         <select id="noteRole" class="role-select">
-                            <option value="護理師">👩‍⚕️ 護理師</option>
-                            <option value="主治醫師">👨‍⚕️ 主治醫師</option>
-                            <option value="復健師">🧘 復健師</option>
-                            <option value="家屬">🏠 家屬</option>
+                            <option value="Nurse" data-i18n="roleNurse">👩‍⚕️ Nurse</option>
+                            <option value="Doctor" data-i18n="roleDoctor">👨‍⚕️ Doctor</option>
+                            <option value="Therapist" data-i18n="roleTherapist">🧘 Therapist</option>
+                            <option value="Family" data-i18n="roleFamily">🏠 Family</option>
                         </select>
                     </div>
                     
                     <div class="input-group">
-                        <textarea id="sysMsgInput" placeholder="輸入訊息..."></textarea>
-                        <button id="sendMsgBtn">發送</button>
+                        <textarea id="sysMsgInput" placeholder="Enter message..."></textarea>
+                        <button id="sendMsgBtn" data-i18n="sendBtn">Send</button>
                     </div>
                 </div>
             </div>
@@ -47,21 +49,21 @@
 
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin-bottom: 0; border: none;">📱 設備管理中心</h2>
-                <button onclick="openReportModal()" class="btn-report" id="reportBtn" style="display: none;">
-                    📄 生成醫療報告
+                <h2 style="margin-bottom: 0; border: none;" data-i18n="deviceCenter">📱 Device Management Center</h2>
+                <button onclick="openReportModal()" class="btn-report" id="reportBtn" style="display: none;" data-i18n="genReport">
+                    📄 Generate Medical Report
                 </button>
             </div>
             
             <div class="device-toolbar">
                 <div class="device-list" id="deviceList">
-                    <div class="loading">正在搜尋 Firebase 中的設備...</div>
+                    <div class="loading" data-i18n="searchingDev">Searching for devices in Firebase...</div>
                 </div>
 
                 <div class="control-panel" id="remoteControls" style="display: none;">
-                    <div class="panel-title">遠程控制</div>
+                    <div class="panel-title" data-i18n="remoteCtrl">Remote Control</div>
                     <div class="status-indicator">
-                        難度: <span id="currentDiff" class="diff-badge">--</span>
+                        <span data-i18n="diffLabel">Difficulty:</span> <span id="currentDiff" class="diff-badge">--</span>
                     </div>
                     <div class="btn-group">
                         <button class="btn-ctrl btn-easy" onclick="setDifficulty(0)">Easy</button>
@@ -75,53 +77,53 @@
 
         <div class="dashboard">
             <div class="card">
-                <h2>📊 累計數據</h2>
+                <h2 data-i18n="cumulativeData">📊 Cumulative Data</h2>
                 <div class="stat-group">
                     <div class="stat-item">
                         <div class="stat-number" id="totalGames">0</div>
-                        <div class="stat-label">總遊玩次數</div>
+                        <div class="stat-label" data-i18n="totalSessions">Total Sessions</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-number" id="highScore">0</div>
-                        <div class="stat-label">最高分</div>
+                        <div class="stat-label" data-i18n="highScore">High Score</div>
                     </div>
                 </div>
             </div>
 
             <div class="card chart-card">
-                <h2>📈 近期表現</h2>
+                <h2 data-i18n="recentPerf">📈 Recent Performance</h2>
                 <div class="chart-container">
                     <canvas id="scoreChart"></canvas>
                 </div>
             </div>
 
             <div class="card">
-                <h2>🎯 最新一局</h2>
+                <h2 data-i18n="latestSession">🎯 Latest Session</h2>
                 <div class="stat-number" id="latestScore">0</div>
-                <div class="stat-label">分數</div>
+                <div class="stat-label" data-i18n="scoreLabel">Score</div>
                 <div id="latestMode" style="font-weight: bold; margin-bottom: 5px; color: #0277bd;">--</div>
                 <div id="latestTime" style="color: #666; font-size: 0.85em;">--:--:--</div>
                 <div style="margin-top: 15px;">
-                    狀態: <span id="connectionStatus" class="status-offline">等待數據...</span>
+                    <span data-i18n="statusLabel">Status:</span> <span id="connectionStatus" class="status-offline" data-i18n="waitingData">Waiting for data...</span>
                 </div>
             </div>
         </div>
 
         <div class="card table-card">
-            <h2>📋 詳細記錄清單</h2>
+            <h2 data-i18n="detailedRecords">📋 Detailed Records List</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>時間</th>
-                            <th>模式</th>
-                            <th>分數</th>
-                            <th>耗時</th>
+                            <th data-i18n="colTime">Time</th>
+                            <th data-i18n="colMode">Mode</th>
+                            <th data-i18n="colScore">Score</th>
+                            <th data-i18n="colDuration">Duration</th>
                             <th>Session ID</th>
                         </tr>
                     </thead>
                     <tbody id="recordsBody">
-                        <tr><td colspan="5" class="loading">請選擇設備...</td></tr>
+                        <tr><td colspan="5" class="loading" data-i18n="selectDevPrompt">Please select a device...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -129,58 +131,60 @@
     </div>
 
     <footer>
-        <p>Memory Bloom | Firebase 實時同步 | 最後更新: <span id="lastUpdate">--:--:--</span></p>
+        <p>Memory Bloom | Firebase Realtime Sync | <span data-i18n="lastUpdate">Last Update</span>: <span id="lastUpdate">--:--:--</span></p>
     </footer>
 
     <div id="reportModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📋 認知訓練分析報告</h3>
+                <h3 data-i18n="rptModalTitle">📋 Cognitive Training Analysis Report</h3>
                 <span class="close-btn" onclick="closeReportModal()">&times;</span>
             </div>
             
             <div id="printableArea" class="report-body">
                 <div class="report-title-section">
-                    <h2>Memory Bloom 訓練評估報告</h2>
-                    <p>Training Assessment Report</p>
+                    <h2 id="rpt-title-main">Memory Bloom Cognitive Function Report</h2>
+                    <p id="rpt-title-sub">Cognitive Function Monitoring Report</p>
                 </div>
                 <hr>
                 <div class="report-info">
-                    <p><strong>受測設備/使用者：</strong> <span id="rpt-device-name">--</span></p>
-                    <p><strong>報告生成時間：</strong> <span id="rpt-date">--</span></p>
-                    <p><strong>數據樣本數：</strong> <span id="rpt-sample-count">0</span> 局</p>
+                    <p><strong data-i18n="rptUser">User/Device:</strong> <span id="rpt-device-name">--</span></p>
+                    <p><strong data-i18n="rptTime">Generated Time:</strong> <span id="rpt-date">--</span></p>
+                    <p><strong data-i18n="rptCount">Data Samples:</strong> <span id="rpt-sample-count">0</span> <span data-i18n="rptSessions">sessions</span></p>
                 </div>
 
                 <div class="report-section">
-                    <h4>📊 綜合表現分析</h4>
-                    <p id="rpt-summary-text" class="analysis-text">正在分析數據...</p>
+                    <h4 data-i18n="rptAnalysisHeader">📊 Comprehensive Performance Analysis</h4>
+                    <p id="rpt-summary-text" class="analysis-text">Analyzing data...</p>
                 </div>
 
                 <div class="report-section">
-                    <h4>💡 醫師/AI 建議 (Rule-based)</h4>
+                    <h4 data-i18n="rptSuggestionHeader">💡 Doctor/AI Suggestions (Rule-based)</h4>
                     <ul id="rpt-suggestions" class="suggestion-list">
-                        <li>正在生成建議...</li>
+                        <li>Generating suggestions...</li>
                     </ul>
                 </div>
                 
                 <div class="report-section">
-                    <h4>📝 近期護理留言記錄</h4>
+                    <h4 data-i18n="rptLogHeader">📝 Recent Nursing Logs</h4>
                     <ul id="rpt-note-list" class="report-msg-list">
-                        </ul>
+                    </ul>
                 </div>
                 
                 <div class="report-footer">
-                    <p>本報告由 Memory Bloom 系統自動生成，僅供參考，不作為正式醫療診斷依據。</p>
+                    <p data-i18n="rptDisclaimer">This report is automatically generated by Memory Bloom system for reference only and does not serve as a formal medical diagnosis.</p>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeReportModal()">關閉</button>
-                <button class="btn-download" onclick="downloadPDF()">📥 下載 PDF 報告</button>
+                <button class="btn-cancel" onclick="closeReportModal()" data-i18n="btnClose">Close</button>
+                <button class="btn-download" onclick="downloadPDF()" data-i18n="btnDownload">📥 Download PDF Report</button>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=3.0"></script>
+    <script src="en.js"></script>
+    <script src="zh-hk.js"></script>
+    <script src="script.js?v=3.3"></script>
 </body>
 </html>
