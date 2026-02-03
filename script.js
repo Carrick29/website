@@ -13,13 +13,93 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
+// --- 國際化 (i18n) 設定 ---
+let currentLang = 'en'; // 預設英文
+
+// 語言切換功能
+function changeLanguage() {
+    // 切換語言 (en <-> zh-hk)
+    currentLang = currentLang === 'en' ? 'zh-hk' : 'en';
+    
+    // 獲取當前語言包 (從全域變數 window.translations 讀取)
+    const t = window.translations[currentLang];
+    
+    if (!t) {
+        console.error("Missing translation pack for: " + currentLang);
+        return;
+    }
+    
+    // 1. 更新按鈕文字
+    document.getElementById('langBtn').textContent = currentLang === 'en' ? '🌐 中文' : '🌐 English';
+    
+    // 2. 更新所有帶有 data-i18n 的元素
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) {
+            el.textContent = t[key];
+        }
+    });
+
+    // 3. 更新輸入框 Placeholder
+    document.getElementById('sysMsgInput').placeholder = t.inputPlaceholder;
+
+    // 4. 更新 JS 動態生成的內容 (如下拉選單、圖表等)
+    updateDashboard(); // 刷新儀表板文字
+    refreshChatLogs(); // 重新整理聊天記錄 (刷新角色翻譯)
+}
+
+function refreshChatLogs() {
+    const chatBox = document.getElementById('chatHistory');
+    chatBox.innerHTML = ''; 
+    const t = window.translations[currentLang];
+
+    database.ref('nursing_logs').once('value').then(snapshot => {
+         const logs = snapshot.val();
+         if (!logs) {
+            chatBox.innerHTML = `<div class="chat-placeholder">${t.noLogs}</div>`;
+            return;
+         }
+         Object.values(logs).forEach(log => {
+             // 簡單的角色名翻譯映射 (顯示時翻譯)
+             let displayRole = log.role;
+             if(currentLang === 'en') {
+                 if(log.role === '護理師') displayRole = 'Nurse';
+                 if(log.role === '主治醫師') displayRole = 'Doctor';
+                 if(log.role === '復健師') displayRole = 'Therapist';
+                 if(log.role === '家屬') displayRole = 'Family';
+             } else {
+                 // 如果原始資料是英文，切回中文時也可以翻譯回來 (視你的需求)
+                 if(log.role === 'Nurse') displayRole = '護理師';
+                 if(log.role === 'Doctor') displayRole = '主治醫師';
+                 if(log.role === 'Therapist') displayRole = '復健師';
+                 if(log.role === 'Family') displayRole = '家屬';
+             }
+
+             const msgDiv = document.createElement('div');
+             msgDiv.className = `chat-message role-${getRoleClass(log.role)}`;
+             msgDiv.innerHTML = `
+                <div class="msg-header">
+                    <span class="msg-role">${displayRole}</span>
+                    <span class="msg-time">${log.time}</span>
+                </div>
+                <div class="msg-content">${escapeHtml(log.text)}</div>
+            `;
+            chatBox.appendChild(msgDiv);
+         });
+         chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+
+// 綁定按鈕事件
+document.getElementById('langBtn').addEventListener('click', changeLanguage);
+
+
 let currentDevice = null;
 let currentDeviceName = "";
 let scoreChart = null;
 let scores = [];
-let allChatLogs = []; // 用來暫存聊天記錄給報告使用
+let allChatLogs = []; 
 
-// --- 3.0 重點：聊天室功能 ---
 function initChatSystem() {
     const chatBox = document.getElementById('chatHistory');
     const noteInput = document.getElementById('sysMsgInput');
@@ -31,8 +111,10 @@ function initChatSystem() {
         allChatLogs = []; 
         
         const logs = snapshot.val();
+        const t = window.translations[currentLang];
+
         if (!logs) {
-            chatBox.innerHTML = '<div class="chat-placeholder">暫無留言記錄...</div>';
+            chatBox.innerHTML = `<div class="chat-placeholder">${t.noLogs}</div>`;
             return;
         }
 
@@ -41,9 +123,18 @@ function initChatSystem() {
             const msgDiv = document.createElement('div');
             msgDiv.className = `chat-message role-${getRoleClass(log.role)}`;
             
+            // 顯示時嘗試翻譯角色名
+            let displayRole = log.role;
+            if (currentLang === 'en') {
+                if(log.role === '護理師') displayRole = 'Nurse';
+                if(log.role === '主治醫師') displayRole = 'Doctor';
+                if(log.role === '復健師') displayRole = 'Therapist';
+                if(log.role === '家屬') displayRole = 'Family';
+            }
+
             msgDiv.innerHTML = `
                 <div class="msg-header">
-                    <span class="msg-role">${log.role || '未知'}</span>
+                    <span class="msg-role">${displayRole}</span>
                     <span class="msg-time">${log.time}</span>
                 </div>
                 <div class="msg-content">${escapeHtml(log.text)}</div>
@@ -55,34 +146,32 @@ function initChatSystem() {
 
     sendBtn.onclick = () => {
         const text = noteInput.value.trim();
-        const role = roleSelect.value;
+        let role = roleSelect.options[roleSelect.selectedIndex].text; 
+        role = role.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27FF]/g, "").trim(); // 去除 emoji
+
         if (!text) return;
 
-        sendBtn.textContent = "發送中...";
         sendBtn.disabled = true;
-
         database.ref('nursing_logs').push({
             role: role,
             text: text,
             time: new Date().toLocaleString()
         }).then(() => {
             noteInput.value = '';
-            sendBtn.textContent = "發送";
             sendBtn.disabled = false;
         }).catch(e => {
             console.error(e);
-            alert("發送失敗");
-            sendBtn.textContent = "發送";
+            alert("Error");
             sendBtn.disabled = false;
         });
     };
 }
 
 function getRoleClass(role) {
-    if (role === '護理師') return 'nurse';
-    if (role === '主治醫師') return 'doctor';
-    if (role === '復健師') return 'therapist';
-    if (role === '家屬') return 'family';
+    if (role.includes('護理師') || role.includes('Nurse')) return 'nurse';
+    if (role.includes('醫師') || role.includes('Doctor')) return 'doctor';
+    if (role.includes('復健師') || role.includes('Therapist')) return 'therapist';
+    if (role.includes('家屬') || role.includes('Family')) return 'family';
     return 'default';
 }
 
@@ -91,14 +180,13 @@ function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-// 遠程控制
 function setDifficulty(level) {
     if (!currentDevice) return;
     const cmdStatus = document.getElementById('cmdStatus');
-    cmdStatus.textContent = "發送中...";
+    cmdStatus.textContent = "...";
     database.ref(`devices/${currentDevice}/control/difficulty`).set(level)
-        .then(() => { cmdStatus.textContent = "✅ 已發送"; setTimeout(() => { cmdStatus.textContent = ""; }, 3000); })
-        .catch((e) => { cmdStatus.textContent = "❌ 失敗"; console.error(e); });
+        .then(() => { cmdStatus.textContent = "OK"; setTimeout(() => { cmdStatus.textContent = ""; }, 3000); })
+        .catch((e) => { cmdStatus.textContent = "Fail"; console.error(e); });
 }
 
 function initChart() {
@@ -106,17 +194,18 @@ function initChart() {
     if(scoreChart) scoreChart.destroy();
     scoreChart = new Chart(ctx, {
         type: 'line',
-        data: { labels: [], datasets: [{ label: '分數', data: [], borderColor: '#0277bd', backgroundColor: 'rgba(2,119,189,0.1)', borderWidth: 2, fill: true, tension: 0.3 }] },
+        data: { labels: [], datasets: [{ label: 'Score', data: [], borderColor: '#0277bd', backgroundColor: 'rgba(2,119,189,0.1)', borderWidth: 2, fill: true, tension: 0.3 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } }
     });
 }
 
 function loadDevices() {
     const deviceList = document.getElementById('deviceList');
+    const t = window.translations[currentLang];
     database.ref('devices').on('value', (snapshot) => {
         const data = snapshot.val();
         deviceList.innerHTML = ''; 
-        if (!data) { deviceList.innerHTML = '<div class="loading">無數據</div>'; return; }
+        if (!data) { deviceList.innerHTML = `<div class="loading">${t.searchingDev}</div>`; return; }
 
         Object.keys(data).forEach(mac => {
             const btn = document.createElement('div');
@@ -176,8 +265,9 @@ function selectDevice(deviceId, deviceName) {
 
     database.ref(`devices/${deviceId}/sessions`).orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
         const data = snapshot.val();
+        const t = window.translations[currentLang];
         if (!data) { 
-            document.getElementById('recordsBody').innerHTML = '<tr><td colspan="5" class="loading">無記錄</td></tr>'; 
+            document.getElementById('recordsBody').innerHTML = `<tr><td colspan="5" class="loading">${t.noLogs}</td></tr>`; 
             scores = [];
             return; 
         }
@@ -189,11 +279,12 @@ function selectDevice(deviceId, deviceName) {
 function updateDashboard() {
     const tbody = document.getElementById('recordsBody');
     tbody.innerHTML = '';
+    const t = window.translations[currentLang];
     
     if (scores.length > 0) {
         const latest = scores[0];
         document.getElementById('latestScore').textContent = latest.score;
-        let modeStr = latest.mode === 'memory' ? '記憶模式' : '計數模式';
+        let modeStr = latest.mode === 'memory' ? t.modeMem : t.modeCnt;
         document.getElementById('latestMode').textContent = modeStr;
         document.getElementById('latestTime').textContent = new Date(latest.timestamp * 1000).toLocaleTimeString();
     }
@@ -201,7 +292,7 @@ function updateDashboard() {
     scores.forEach(record => {
         const row = tbody.insertRow();
         const date = record.timestamp ? new Date(record.timestamp * 1000) : new Date();
-        let modeLabel = record.mode === 'memory' ? '記憶' : '計數';
+        let modeLabel = record.mode === 'memory' ? t.modeMem : t.modeCnt;
         row.innerHTML = `<td>${date.toLocaleString()}</td><td><span class="mode-badge">${modeLabel}</span></td><td><span class="score-badge">${record.score}</span></td><td>${record.duration}s</td><td style="font-family: monospace; font-size: 0.8em; color:#999;">${record.sessionID || '-'}</td>`;
     });
 
@@ -214,44 +305,30 @@ function updateDashboard() {
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
 }
 
-function openReportModal() {
-    if (!currentDevice || scores.length === 0) {
-        alert("請先選擇設備，且確保有遊玩記錄才能生成報告！");
-        return;
-    }
-    analyzeAndGenerateReport();
-    document.getElementById('reportModal').style.display = 'flex';
-}
-
-function closeReportModal() {
-    document.getElementById('reportModal').style.display = 'none';
-}
-
-// --- v3.1 核心修改：針對阿茲海默症的分析邏輯 ---
 function analyzeAndGenerateReport() {
-    // 1. 動態修改標題，使其更符合醫療情境
-    document.querySelector('.report-title-section h2').textContent = "Memory Bloom 認知功能追蹤報告";
+    const t = window.translations[currentLang];
+
+    document.querySelector('.report-title-section h2').textContent = currentLang === 'en' ? "Memory Bloom Cognitive Function Report" : "Memory Bloom 認知功能追蹤報告";
     document.querySelector('.report-title-section p').textContent = "Cognitive Function Monitoring Report";
 
     document.getElementById('rpt-device-name').textContent = currentDeviceName || currentDevice;
     document.getElementById('rpt-date').textContent = new Date().toLocaleString();
     document.getElementById('rpt-sample-count').textContent = scores.length;
     
-    // 留言列表
     const rptList = document.getElementById('rpt-note-list');
     rptList.innerHTML = '';
     if (allChatLogs.length > 0) {
         const recentLogs = allChatLogs.slice(-3).reverse();
         recentLogs.forEach(log => {
             const li = document.createElement('li');
-            li.innerHTML = `<strong>${log.role}</strong> (${log.time}): ${log.text}`;
+            let displayRole = log.role;
+            li.innerHTML = `<strong>${displayRole}</strong> (${log.time}): ${log.text}`;
             rptList.appendChild(li);
         });
     } else {
-        rptList.innerHTML = '<li style="font-style:italic;">暫無留言記錄</li>';
+        rptList.innerHTML = `<li style="font-style:italic;">${t.noLogs}</li>`;
     }
 
-    // 計算平均數據
     const recentGames = scores.slice(0, 5);
     const avgRecent = recentGames.reduce((sum, s) => sum + parseInt(s.score), 0) / recentGames.length;
     
@@ -263,36 +340,31 @@ function analyzeAndGenerateReport() {
         hasHistory = true;
     }
 
-    // 2. 分析文案生成 (Alzheimer's Focused)
-    let summaryText = `根據系統監測，長者在近期共進行了 ${scores.length} 次認知復健訓練。最近 5 次訓練的平均準確度評分為 ${avgRecent.toFixed(1)} 分。`;
+    let summaryText = `${t.rptSummaryStart}${scores.length}${t.rptSummaryMid}${avgRecent.toFixed(1)}.`;
     let suggestions = [];
 
     if (hasHistory) {
         if (avgRecent > avgOld * 1.1) {
-            // 進步情境
-            summaryText += ` 數據顯示長者的短期記憶與反應力有回升跡象（提升約 ${((avgRecent - avgOld)/avgOld*100).toFixed(0)}%）。這顯示目前的訓練強度適中，有助於活化腦部神經連結 (Neuroplasticity)。`;
-            suggestions.push("🧠 認知強化：建議維持目前的互動頻率，適度給予讚美以增強長者的自信心。");
-            suggestions.push("💪 難度調整：若長者表現輕鬆，可嘗試微調至 'Auto' 或 'Hard' 模式以提供適當的認知刺激。");
+            summaryText += `${t.rptProgress}${((avgRecent - avgOld)/avgOld*100).toFixed(0)}%).`;
+            suggestions.push(t.rptProgressSugg1);
+            suggestions.push(t.rptProgressSugg2);
         } else if (avgRecent < avgOld * 0.9) {
-            // 退步情境
-            summaryText += ` 近期認知表現出現波動，準確率較前一階段下降。對於阿茲海默症患者，這可能與情緒焦慮、睡眠品質或生理不適有關。`;
-            suggestions.push("❤️ 情緒安撫：請觀察長者是否有焦慮或「日落症候群 (Sundowning)」現象，訓練時請保持耐心，避免強迫。");
-            suggestions.push("📅 生活規律：建議固定訓練時間，建立穩定的生活作息有助於穩定認知狀態。");
+            summaryText += t.rptDecline;
+            suggestions.push(t.rptDeclineSugg1);
+            suggestions.push(t.rptDeclineSugg2);
         } else {
-            // 穩定情境 (對於失智症，這就是好事！)
-            summaryText += ` 認知狀態保持穩定。對於神經退化性疾病而言，「不退步」即是相當正面的指標，顯示目前的照護與訓練策略有效。`;
-            suggestions.push("✅ 持續復健：請繼續鼓勵長者每日進行少量多次的練習，保持大腦活躍度。");
-            suggestions.push("🏠 環境支持：確保訓練環境安靜、光線充足，減少分心因素。");
+            summaryText += t.rptStable;
+            suggestions.push(t.rptStableSugg1);
+            suggestions.push(t.rptStableSugg2);
         }
     } else {
-        summaryText += " 系統正在建立個人的認知基準線 (Baseline)。持續的數據積累將有助於更精準地評估病情發展。";
-        suggestions.push("ℹ️ 建立習慣：初期建議以「陪伴」為主，讓長者熟悉設備操作，減少對科技產品的排斥感。");
+        summaryText += t.rptBaseline;
+        suggestions.push(t.rptBaselineSugg);
     }
 
-    // 檢查單次低分 (可能是心情不好或太累)
     const lastGame = scores[0];
-    if (lastGame.score < 2) { // 假設分數很低
-        suggestions.push("⚠️ 狀態關注：最新一次訓練分數較低，請確認長者是否疲勞或身體不適。");
+    if (lastGame.score < 2) { 
+        suggestions.push(t.rptLowScore);
     }
 
     document.getElementById('rpt-summary-text').textContent = summaryText;
@@ -310,7 +382,7 @@ function downloadPDF() {
     const element = document.getElementById('printableArea');
     const opt = {
         margin:       10,
-        filename:     `MemoryBloom_CareReport_${new Date().toISOString().slice(0,10)}.pdf`,
+        filename:     `MemoryBloom_Report_${new Date().toISOString().slice(0,10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -318,7 +390,7 @@ function downloadPDF() {
     
     const btn = document.querySelector('.btn-download');
     const originalText = btn.textContent;
-    btn.textContent = "⏳ 生成中...";
+    btn.textContent = "⏳ ...";
     
     html2pdf().set(opt).from(element).save().then(() => {
         btn.textContent = originalText;
