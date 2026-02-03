@@ -11,6 +11,24 @@ body {
     padding: 20px;
 }
 
+/* 新增：懸浮語言切換按鈕 */
+.btn-lang {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #01579b;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 100;
+    transition: background 0.2s;
+}
+.btn-lang:hover { background: #0277bd; }
+
 .container {
     width: 100%;
     max-width: 100%;
@@ -54,11 +72,11 @@ body {
 .title-card .subtitle { color: #546e7a; font-weight: 600; margin-bottom: 5px; }
 .title-card .version-info { color: #90a4ae; font-size: 0.85em; letter-spacing: 0.5px; }
 
-/* --- 右側留言格 (大改版：聊天記錄樣式) --- */
+/* --- 右側留言格 (聊天記錄樣式) --- */
 .note-card { 
     display: flex; 
     flex-direction: column; 
-    height: 400px; /* 給定高度讓它能捲動 */
+    height: 400px; 
 }
 
 .chat-history-box {
@@ -67,7 +85,7 @@ body {
     border: 1px solid #dee2e6;
     border-radius: 6px;
     padding: 15px;
-    overflow-y: auto; /* 允許垂直捲動 */
+    overflow-y: auto;
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
@@ -81,13 +99,12 @@ body {
     font-style: italic;
 }
 
-/* 聊天氣泡卡片 */
 .chat-message {
     background: #fff;
     padding: 10px 15px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border-left: 4px solid #ccc; /* 預設邊框色 */
+    border-left: 4px solid #ccc; 
     animation: fadeIn 0.3s ease;
 }
 
@@ -105,16 +122,16 @@ body {
 .msg-content { color: #333; line-height: 1.5; white-space: pre-wrap; }
 
 /* 角色顏色區分 */
-.role-nurse { border-left-color: #e91e63; } /* 護理師：粉紅 */
+.role-nurse { border-left-color: #e91e63; } 
 .role-nurse .msg-role { color: #e91e63; }
 
-.role-doctor { border-left-color: #2196f3; } /* 醫師：藍 */
+.role-doctor { border-left-color: #2196f3; } 
 .role-doctor .msg-role { color: #2196f3; }
 
-.role-therapist { border-left-color: #ff9800; } /* 復健師：橘 */
+.role-therapist { border-left-color: #ff9800; } 
 .role-therapist .msg-role { color: #ff9800; }
 
-.role-family { border-left-color: #4caf50; } /* 家屬：綠 */
+.role-family { border-left-color: #4caf50; } 
 .role-family .msg-role { color: #4caf50; }
 
 
@@ -149,7 +166,7 @@ body {
 
 .chat-input-area textarea {
     flex: 1;
-    height: 40px; /* 預設矮一點，但可以拉高 */
+    height: 40px; 
     min-height: 40px;
     padding: 8px;
     border: 1px solid #b0bec5;
@@ -168,6 +185,7 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: background 0.2s;
+    min-width: 80px;
 }
 #sendMsgBtn:hover { background: #01579b; }
 
@@ -342,7 +360,6 @@ footer { text-align: center; padding: 20px; color: #90a4ae; border-top: 2px soli
 .analysis-text { line-height: 1.8; text-align: justify; color: #333; }
 .suggestion-list li { margin-bottom: 8px; line-height: 1.6; }
 
-/* 報告中的留言列表 */
 .report-msg-list {
     list-style: none;
     padding: 0;
