@@ -442,5 +442,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initChart();
     initChatSystem();
     loadDevices();
-    document.getElementById('langBtn').textContent = '🌐 English'; // 初始为英文界面
+    document.getElementById('langBtn').textContent = '🌐 English';
 });

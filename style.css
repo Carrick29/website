@@ -343,9 +343,17 @@ footer { text-align: center; padding: 20px; color: #90a4ae; margin-top: auto; fo
 
 .report-body {
     padding: 40px;
-    overflow-y: auto;
+    /* 移除 overflow-y: auto 或 max-height 限制，让内容自然扩展 */
+    overflow: auto;
     font-family: 'Times New Roman', 'KaiTi', serif;
     background: #fff;
+}
+
+/* 确保打印时背景和颜色保留 */
+@media print {
+    .report-body {
+        padding: 20px;
+    }
 }
 
 .report-title-section { text-align: center; margin-bottom: 20px; }
