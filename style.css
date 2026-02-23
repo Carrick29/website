@@ -14,7 +14,7 @@ body {
 /* 新增：懸浮語言切換按鈕 */
 .btn-lang {
     position: absolute;
-    top: 20px;
+    top: 0px;
     right: 20px;
     background: #01579b;
     color: white;
@@ -60,13 +60,19 @@ body {
     padding-bottom: 8px;
 }
 
-/* 左側標題格 */
+/* 左側標題格 - 加入 Logo 樣式 */
 .title-card {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+}
+.title-card .logo {
+    width: 278px;
+    height: auto;
+    margin-bottom: 12px;
+    border-radius: 8px;
 }
 .title-card h1 { color: #01579b; font-size: 1.8em; margin-bottom: 8px; }
 .title-card .subtitle { color: #546e7a; font-weight: 600; margin-bottom: 5px; }
@@ -76,7 +82,7 @@ body {
 .note-card { 
     display: flex; 
     flex-direction: column; 
-    height: 400px; 
+    height: 450px; 
 }
 
 .chat-history-box {
