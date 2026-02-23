@@ -121,7 +121,7 @@ function changeLanguage() {
     }
     
     // 1. 更新按鈕文字
-    document.getElementById('langBtn').textContent = currentLang === 'en' ? '🌐 中文' : '🌐 English';
+    document.getElementById('langBtn').textContent = currentLang === 'en' ? '🌐 English' : '🌐 中文';
     
     // 2. 更新所有帶有 data-i18n 的元素
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -442,4 +442,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initChart();
     initChatSystem();
     loadDevices();
+    document.getElementById('langBtn').textContent = '🌐 English'; // 初始为英文界面
 });

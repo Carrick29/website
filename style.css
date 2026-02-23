@@ -280,7 +280,7 @@ th, td { padding: 10px 12px; border: 1px solid #e0e0e0; text-align: left; }
 th { background: #e1f5fe; color: #01579b; border-color: #0277bd; }
 td { border-color: #bbdefb; }
 
-footer { text-align: center; padding: 20px; color: #90a4ae; border-top: 2px solid #0277bd; margin-top: auto; font-size: 0.85em; }
+footer { text-align: center; padding: 20px; color: #90a4ae; margin-top: auto; font-size: 0.85em; }
 .loading { color: #999; font-style: italic; padding: 20px; text-align: center; }
 
 /* --- 報告模態框 --- */
