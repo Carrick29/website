@@ -122,7 +122,6 @@ body {
 .msg-time { color: #999; }
 .msg-content { color: #333; line-height: 1.5; white-space: pre-wrap; }
 
-/* 角色顏色區分 */
 .role-nurse { border-left-color: #e91e63; } 
 .role-nurse .msg-role { color: #e91e63; }
 
