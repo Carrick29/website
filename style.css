@@ -1,4 +1,3 @@
-/* --- 基礎設定 --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -11,7 +10,6 @@ body {
     padding: 20px;
 }
 
-/* 新增：懸浮語言切換按鈕 */
 .btn-lang {
     position: absolute;
     top: 0px;
@@ -36,7 +34,6 @@ body {
     flex: 1;
 }
 
-/* --- 第一行佈局 --- */
 .top-row {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
@@ -60,7 +57,6 @@ body {
     padding-bottom: 8px;
 }
 
-/* 左側標題格 - 加入 Logo 樣式 */
 .title-card {
     display: flex;
     flex-direction: column;
@@ -78,7 +74,6 @@ body {
 .title-card .subtitle { color: #546e7a; font-weight: 600; margin-bottom: 5px; }
 .title-card .version-info { color: #90a4ae; font-size: 0.85em; letter-spacing: 0.5px; }
 
-/* --- 右側留言格 (聊天記錄樣式) --- */
 .note-card { 
     display: flex; 
     flex-direction: column; 
@@ -140,8 +135,6 @@ body {
 .role-family { border-left-color: #4caf50; } 
 .role-family .msg-role { color: #4caf50; }
 
-
-/* 輸入區樣式 */
 .chat-input-area {
     display: flex;
     flex-direction: column;
@@ -195,8 +188,6 @@ body {
 }
 #sendMsgBtn:hover { background: #01579b; }
 
-
-/* --- 設備與控制區 --- */
 .device-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -258,7 +249,6 @@ body {
 .btn-ctrl:hover { background: #0277bd; color: #fff; }
 .cmd-feedback { font-size: 0.8em; color: #2e7d32; font-weight: bold; margin-left: 8px; }
 
-/* --- 儀表板 --- */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -283,7 +273,6 @@ td { border-color: #bbdefb; }
 footer { text-align: center; padding: 20px; color: #90a4ae; margin-top: auto; font-size: 0.85em; }
 .loading { color: #999; font-style: italic; padding: 20px; text-align: center; }
 
-/* --- 報告模態框 --- */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -343,13 +332,11 @@ footer { text-align: center; padding: 20px; color: #90a4ae; margin-top: auto; fo
 
 .report-body {
     padding: 40px;
-    /* 移除 overflow-y: auto 或 max-height 限制，让内容自然扩展 */
     overflow: auto;
     font-family: 'Times New Roman', 'KaiTi', serif;
     background: #fff;
 }
 
-/* 确保打印时背景和颜色保留 */
 @media print {
     .report-body {
         padding: 20px;
